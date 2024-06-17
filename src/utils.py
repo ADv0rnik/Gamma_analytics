@@ -37,33 +37,6 @@ class DataFormatter:
         return pd.DataFrame(data=data)
 
 
-# class DataFormatter:
-#     FILENAME = os.path.join(BASE_DIR, "nuclib", "attenuation_table.csv")
-#
-#     @classmethod
-#     def csv_to_dataframe(cls):
-#         with open(cls.FILENAME, newline='') as csvfile:
-#             energy, mu = [], []
-#             reader = csv.reader(csvfile, delimiter=',')
-#             next(reader)
-#             for row in reader:
-#                 energy.append(float(row[0]))
-#                 mu.append(float(row[1]))
-#             dataframe = pd.DataFrame({"energy": energy, "mu": mu})
-#         return dataframe
-#
-#     @classmethod
-#     def interpolate_data(cls, scaling_factor=1000):
-#         data = cls.csv_to_dataframe()
-#         x = data["energy"].to_numpy()
-#         y = data["mu"].to_numpy()
-#         f = interp1d(x, y)
-#         return f(SOURCE_ENERGY / scaling_factor)
-#
-#
-# formatter = DataFormatter()
-
-
 def calculate_angles(
         x_position: np.ndarray,
         y_position: np.ndarray,
