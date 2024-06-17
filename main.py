@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 from matplotlib import pyplot as plt
-from src.utils import formatter
+from src.utils import DataFormatter
 from src.config import (
     BRANCH_RATIO,
     EFFICIENCY,
@@ -20,9 +20,14 @@ from src.config import (
 
 x_coord = np.arange(-300, 300, 1)  # 1s of measurements
 y_coord = np.zeros(len(x_coord))
-mu_air = formatter.interpolate_data()
 
+ATTENUATION_FILE = os.path.join(BASE_DIR, "nuclib", "attenuation_table.csv")
 OUTPUT_DIR = os.path.join(BASE_DIR, 'outputs')
+
+formatter = DataFormatter(ATTENUATION_FILE)
+data = formatter.get_dataframe()
+print(data)
+mu_air = 0.0015 # TODO: Needs to make an interpolator class for different types of approximation (Factory??)
 
 
 async def calculate_fluence_rate(x_position, y_position, activity, src_x=SRC_X, src_y=SRC_Y, eff=EFFICIENCY):

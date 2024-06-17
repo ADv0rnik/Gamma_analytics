@@ -11,30 +11,57 @@ y_coord = np.zeros(len(x_coord))
 
 
 class DataFormatter:
-    FILENAME = os.path.join(BASE_DIR, "nuclib", "attenuation_table.csv")
+    def __init__(self, filename):
+        self.filename = filename
 
-    @classmethod
-    def csv_to_dataframe(cls):
-        with open(cls.FILENAME, newline='') as csvfile:
-            energy, mu = [], []
+    def __csv_to_dict(self):
+        """
+        Transform the data from csv file to dictionary with headers as keys.
+        :return: dictionary with headers as keys or ValueError
+        """
+
+        with open(self.filename, newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
-            next(reader)
+            headers = [header.strip() for header in next(reader)]
+            data_dict = {header: [] for header in headers}
             for row in reader:
-                energy.append(float(row[0]))
-                mu.append(float(row[1]))
-            dataframe = pd.DataFrame({"energy": energy, "mu": mu})
-        return dataframe
+                for i, value in enumerate(row):
+                    try:
+                        data_dict[headers[i]].append(float(value))
+                    except ValueError as err:
+                        return err
+        return data_dict
 
-    @classmethod
-    def interpolate_data(cls, scaling_factor=1000):
-        data = cls.csv_to_dataframe()
-        x = data["energy"].to_numpy()
-        y = data["mu"].to_numpy()
-        f = interp1d(x, y)
-        return f(SOURCE_ENERGY / scaling_factor)
+    def get_dataframe(self):
+        data = self.__csv_to_dict()
+        return pd.DataFrame(data=data)
 
 
-formatter = DataFormatter()
+# class DataFormatter:
+#     FILENAME = os.path.join(BASE_DIR, "nuclib", "attenuation_table.csv")
+#
+#     @classmethod
+#     def csv_to_dataframe(cls):
+#         with open(cls.FILENAME, newline='') as csvfile:
+#             energy, mu = [], []
+#             reader = csv.reader(csvfile, delimiter=',')
+#             next(reader)
+#             for row in reader:
+#                 energy.append(float(row[0]))
+#                 mu.append(float(row[1]))
+#             dataframe = pd.DataFrame({"energy": energy, "mu": mu})
+#         return dataframe
+#
+#     @classmethod
+#     def interpolate_data(cls, scaling_factor=1000):
+#         data = cls.csv_to_dataframe()
+#         x = data["energy"].to_numpy()
+#         y = data["mu"].to_numpy()
+#         f = interp1d(x, y)
+#         return f(SOURCE_ENERGY / scaling_factor)
+#
+#
+# formatter = DataFormatter()
 
 
 def calculate_angles(
@@ -68,7 +95,7 @@ def calculate_angles(
     return pred_angles * (180 / np.pi)
 
 
-result = calculate_angles(x_coord, y_coord, SRC_X, SRC_Y)
-print(result)
+# result = calculate_angles(x_coord, y_coord, SRC_X, SRC_Y)
+# print(result)
 
 #TODO: Check the negative values of angles and convert them to positive values in the range from 0 to 360.
