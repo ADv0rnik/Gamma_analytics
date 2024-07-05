@@ -26,7 +26,7 @@ OUTPUT_DIR = os.path.join(BASE_DIR, 'outputs')
 
 formatter = DataFormatter(ATTENUATION_FILE)
 data = formatter.get_dataframe()
-print(data)
+
 mu_air = 0.0015 # TODO: Needs to make an interpolator class for different types of approximation (Factory??)
 
 

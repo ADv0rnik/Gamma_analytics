@@ -6,7 +6,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 from src.config import SOURCE_ENERGY, BASE_DIR, SRC_Y, SRC_X
 
-x_coord = np.arange(-300, 301, 1)
+x_coord = np.arange(-50, 51, 1)
 y_coord = np.zeros(len(x_coord))
 
 
@@ -58,17 +58,16 @@ def calculate_angles(
 
     vector_x = np.append(np.diff(x_position), [0])
     vector_y = np.append(np.diff(y_position), [0])
-    source_vector_x = x_position - src_x
+    source_vector_x = src_x - x_position
     source_vector_y = y_position - src_y
-
     pred_angles = np.arctan2(vector_y, vector_x) - np.arctan2(
         source_vector_y, source_vector_x
     )
-    # if pred_angles
+
+    # convert negative radian values to positive
+    pred_angles[pred_angles < 0] = pred_angles[pred_angles < 0] + 2 * np.pi
+
     return pred_angles * (180 / np.pi)
 
 
-# result = calculate_angles(x_coord, y_coord, SRC_X, SRC_Y)
-# print(result)
-
-#TODO: Check the negative values of angles and convert them to positive values in the range from 0 to 360.
+result = calculate_angles(x_coord, y_coord, SRC_X, SRC_Y)
