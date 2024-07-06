@@ -1,40 +1,9 @@
-import csv
-import os
-import pandas as pd
 import numpy as np
 
-from scipy.interpolate import interp1d
-from src.config import SOURCE_ENERGY, BASE_DIR, SRC_Y, SRC_X
+from src.config import SRC_Y, SRC_X
 
 x_coord = np.arange(-50, 51, 1)
 y_coord = np.zeros(len(x_coord))
-
-
-class DataFormatter:
-    def __init__(self, filename):
-        self.filename = filename
-
-    def __csv_to_dict(self):
-        """
-        Transform the data from csv file to dictionary with headers as keys.
-        :return: dictionary with headers as keys or ValueError
-        """
-
-        with open(self.filename, newline='') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
-            headers = [header.strip() for header in next(reader)]
-            data_dict = {header: [] for header in headers}
-            for row in reader:
-                for i, value in enumerate(row):
-                    try:
-                        data_dict[headers[i]].append(float(value))
-                    except ValueError as err:
-                        return err
-        return data_dict
-
-    def get_dataframe(self):
-        data = self.__csv_to_dict()
-        return pd.DataFrame(data=data)
 
 
 def calculate_angles(
@@ -70,4 +39,4 @@ def calculate_angles(
     return pred_angles * (180 / np.pi)
 
 
-result = calculate_angles(x_coord, y_coord, SRC_X, SRC_Y)
+# result = calculate_angles(x_coord, y_coord, SRC_X, SRC_Y)
