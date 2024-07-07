@@ -1,9 +1,7 @@
 import numpy as np
+import pandas as pd
 
 from src.config import SRC_Y, SRC_X
-
-x_coord = np.arange(-50, 51, 1)
-y_coord = np.zeros(len(x_coord))
 
 
 def calculate_angles(
@@ -39,4 +37,5 @@ def calculate_angles(
     return pred_angles * (180 / np.pi)
 
 
-# result = calculate_angles(x_coord, y_coord, SRC_X, SRC_Y)
+async def create_dataframe(data: dict) -> pd.DataFrame:
+    return pd.DataFrame(data)
