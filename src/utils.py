@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from src.config import SRC_Y, SRC_X
+from src.config import SRC_Y, SRC_X, x_coord, y_coord
 
 
 def calculate_angles(
@@ -33,6 +33,8 @@ def calculate_angles(
 
     # convert negative radian values to positive
     pred_angles[pred_angles < 0] = pred_angles[pred_angles < 0] + 2 * np.pi
+    pred_angles[pred_angles > np.pi] = pred_angles[pred_angles > np.pi] - 2 * np.pi
+    pred_angles[pred_angles < -np.pi] = pred_angles[pred_angles > np.pi] + 2 * np.pi
 
     return pred_angles * (180 / np.pi)
 

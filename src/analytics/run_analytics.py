@@ -14,9 +14,6 @@ from src.config import (
     EFF_FILE
 )
 
-efficiency_df = formatter.get_dataframe(EFF_FILE)
-efficiency_interpolator = EfficiencyInterpolator(efficiency_df)
-
 
 async def calculate_fluence_rate(x_position, y_position, activity, src_x=SRC_X, src_y=SRC_Y, eff=EFFICIENCY):
     dist = np.sqrt((x_position - src_x) ** 2 + (y_position - src_y) ** 2)
@@ -25,9 +22,13 @@ async def calculate_fluence_rate(x_position, y_position, activity, src_x=SRC_X, 
 
 
 async def calculate_fluence_rate_angular(x_position, y_position, activity, src_x=SRC_X, src_y=SRC_Y, eff=EFFICIENCY):
+    efficiency_df = formatter.get_dataframe(EFF_FILE)
+    efficiency_interpolator = EfficiencyInterpolator(efficiency_df)
+
     dist = np.sqrt((x_position - src_x) ** 2 + (y_position - src_y) ** 2)
     calc_angles = calculate_angles(x_position, y_position, SRC_X, SRC_Y)
     eff_rel = efficiency_interpolator.interpolate(calc_angles)
+
     angular_fluence_rate = (activity * SCALE * BRANCH_RATIO * eff * eff_rel * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
     return angular_fluence_rate
 

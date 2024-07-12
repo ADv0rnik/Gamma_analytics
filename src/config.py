@@ -16,7 +16,8 @@ EFF_FILE = os.path.join(BASE_DIR, "nuclib", "relative_efficiency_HPGe.csv")
 if not os.path.exists(OUTPUT_DIR):
     os.mkdir(OUTPUT_DIR)
 
-NORMALIZED = True
+NORMALIZED = False
+CALCULATE_ANGLES = True  # taking angular distribution into account
 
 # Source params for ceasium-137
 BRANCH_RATIO = BranchingRatio.CS_137.value
@@ -28,7 +29,7 @@ SCALE = 1e6
 # (SRC_X and SRC_Y) is specified.
 IS_FIXED_DISTANCE = True
 SRC_X = 0
-SRC_Y = -50
+SRC_Y = 50
 DIST_MIN = -300
 DIST_MAX = 300
 STEP = 50
