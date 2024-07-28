@@ -10,19 +10,20 @@ from src.config import (
 )
 
 
-async def run_analytics(make_plot=True):
+async def run_analytics(make_plot=False):
     analyser = Analyser(
         coordinates=(x_coord, y_coord),
         include_angles=False
     )
 
     df = await analyser.construct_data()
+    print(df)
     if NORMALIZED:
         df = await make_normalization(df)
     if make_plot:
         make_graph(df)
     else:
-        df.to_csv("simulated_data_eff_ref_eff_rel.csv")
+        df.to_csv("simulated_data_eff_ref_eff_rel1.csv")
 
 
 if __name__ == '__main__':

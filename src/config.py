@@ -23,10 +23,10 @@ CALCULATE_ANGLES = True  # taking angular distribution into account
 BRANCH_RATIO = BranchingRatio.CS_137.value
 SOURCE_ENERGY = Energy.CS_137.value  # in KeV
 SCALE = 1e6
+ACTIVITY_BKG = 10
 
 # Position of the orphan source within Cartesian coordinate system.
-# Use IS_FIXED_DISTANCE=True if the distance from the road to the source
-# (SRC_X and SRC_Y) is specified.
+# Use IS_FIXED_DISTANCE=True if the distance from the road to the source (SRC_X and SRC_Y) is specified.
 IS_FIXED_DISTANCE = True
 SRC_X = 0
 SRC_Y = 50
