@@ -1,7 +1,9 @@
+import os
 import numpy as np
 import pandas as pd
+import zipfile
 
-from src.config import SRC_Y, SRC_X, x_coord, y_coord
+from src.config import SRC_Y, SRC_X, OUTPUT_DIR
 
 
 def calculate_angles(
@@ -41,3 +43,14 @@ def calculate_angles(
 
 async def create_dataframe(data: dict) -> pd.DataFrame:
     return pd.DataFrame(data)
+
+
+def zip_files(files: list[str]):
+    basename, _ = os.path.splitext(files[0])
+    zip_filename = f"{basename}.zip"
+    print(f"creating {zip_filename}")
+
+    with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zip_f:
+        for f in files:
+            zip_f.write(filename=f, arcname=os.path.basename(f))
+    return zip_filename

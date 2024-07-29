@@ -1,30 +1,30 @@
-import asyncio
+import uvicorn
+from fastapi import FastAPI
 
-from src.analytics.analyser import Analyser
-from src.analytics.run_analytics import make_normalization
-from src.presentation.plot_maker import make_graph
-from src.config import (
-    x_coord,
-    y_coord,
-    NORMALIZED,
-)
+from src.config import ApiSettings
+from src.api.api import analytics_router
 
 
-async def run_analytics(make_plot=False):
-    analyser = Analyser(
-        coordinates=(x_coord, y_coord),
-        include_angles=True
+def start_application(config: ApiSettings):
+    application = FastAPI(
+        debug=True,
+        title=config.PROJECT_NAME,
+        version=config.PROJECT_VERSION,
+        description="Bayesian simulator for gamma-radiation measurements",
+        docs_url=f"{config.API_V1_STR}/docs",
+        redoc_url=f"{config.API_V1_STR}/redoc",
     )
-
-    df = await analyser.construct_data()
-    print(df)
-    if NORMALIZED:
-        df = await make_normalization(df)
-    if make_plot:
-        make_graph(df)
-    else:
-        df.to_csv("simulated_data_eff_ref_eff_rel1.csv")
+    return application
 
 
-if __name__ == '__main__':
-    asyncio.run(run_analytics())
+settings = ApiSettings()
+app = start_application(settings)
+app.include_router(analytics_router, prefix=settings.API_V1_STR)
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host=settings.PROJECT_HOST,
+        port=int(settings.PROJECT_PORT),
+        reload=True
+    )

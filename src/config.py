@@ -60,7 +60,7 @@ class ApiSettings(BaseSettings):
     PROJECT_NAME: str
     PROJECT_VERSION: str
     PROJECT_HOST: str
-    PORT: int
+    PROJECT_PORT: int
 
     class Config:
         env_file = ENV_PATH
