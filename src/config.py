@@ -1,14 +1,17 @@
 import os
 import numpy as np
 from pathlib import Path
+from pydantic_settings import BaseSettings
 
 from nuclib.nuclides import Energy, BranchingRatio
 from src.tools.data_formatter import formatter
 from src.tools.interpolators import AttenuationInterpolator
 
+
 # common params
 BASE_DIR = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = os.path.join(BASE_DIR, 'outputs')
+ENV_PATH = os.path.join(BASE_DIR, '.env')
 
 ATTENUATION_FILE = os.path.join(BASE_DIR, "nuclib", "attenuation_table.csv")
 EFF_FILE = os.path.join(BASE_DIR, "nuclib", "relative_efficiency_HPGe.csv")
@@ -23,7 +26,7 @@ CALCULATE_ANGLES = True  # taking angular distribution into account
 BRANCH_RATIO = BranchingRatio.CS_137.value
 SOURCE_ENERGY = Energy.CS_137.value  # in KeV
 SCALE = 1e6
-ACTIVITY_BKG = 10
+BKG_ACTIVITY = 10
 
 # Position of the orphan source within Cartesian coordinate system.
 # Use IS_FIXED_DISTANCE=True if the distance from the road to the source (SRC_X and SRC_Y) is specified.
@@ -50,3 +53,19 @@ attenuation_df = formatter.get_dataframe(ATTENUATION_FILE)
 attenuation_interpolator = AttenuationInterpolator(attenuation_df)
 
 mu_air = attenuation_interpolator.interpolate(SOURCE_ENERGY)  # mu_air = 0.0015
+
+
+class ApiSettings(BaseSettings):
+    API_V1_STR: str = "/api/v1"
+    PROJECT_NAME: str
+    PROJECT_VERSION: str
+    PROJECT_HOST: str
+    PORT: int
+
+    class Config:
+        env_file = ENV_PATH
+        env_file_encoding = 'utf-8'
+        case_sensitive = True
+
+
+settings = ApiSettings()

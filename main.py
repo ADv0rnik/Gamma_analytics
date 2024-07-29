@@ -13,7 +13,7 @@ from src.config import (
 async def run_analytics(make_plot=False):
     analyser = Analyser(
         coordinates=(x_coord, y_coord),
-        include_angles=False
+        include_angles=True
     )
 
     df = await analyser.construct_data()

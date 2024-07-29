@@ -2,7 +2,7 @@ import asyncio
 import numpy as np
 from typing import Tuple
 
-from src.analytics.run_analytics import calculate_fluence_rate, calculate_fluence_rate_angular
+from src.analytics.run_analytics import calculate_count_rate, calculate_count_rate_angular
 from src.config import IS_FIXED_DISTANCE, src_y_probe
 from src.utils import create_dataframe
 
@@ -11,7 +11,7 @@ class Analyser:
     def __init__(
             self,
             coordinates: Tuple[float, float] = None,
-            activity: int = 100,
+            activity: int = 1000,
             dist_predefined: bool = IS_FIXED_DISTANCE,
             include_angles: bool = True
     ):
@@ -23,7 +23,7 @@ class Analyser:
     async def __get_dist_arrays(self):
         jobs = []
         for probe in src_y_probe.values():
-            jobs.append(asyncio.create_task(calculate_fluence_rate(
+            jobs.append(asyncio.create_task(calculate_count_rate(
                 self.coordinates[0],
                 self.coordinates[1],
                 src_y=probe,
@@ -42,7 +42,7 @@ class Analyser:
         data_dict = {'x': self.coordinates[0], 'y': self.coordinates[1]}
         if not self.include_angles:
             if self.dist_predefined:
-                sim_data = await calculate_fluence_rate(
+                sim_data = await calculate_count_rate(
                     self.coordinates[0],
                     self.coordinates[1],
                     self.activity
@@ -55,7 +55,7 @@ class Analyser:
                     data_dict[f"sim_data_{src_y_probe[i]}"] = item
             return await create_dataframe(data_dict)
         else:
-            sim_data = await calculate_fluence_rate_angular(
+            sim_data = await calculate_count_rate_angular(
                 self.coordinates[0],
                 self.coordinates[1],
                 self.activity

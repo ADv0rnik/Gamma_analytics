@@ -11,17 +11,33 @@ from src.config import (
     SRC_X,
     SRC_Y,
     EFFICIENCY,
-    EFF_FILE
+    EFF_FILE,
+    BKG_ACTIVITY
 )
 
 
-async def calculate_fluence_rate(x_position, y_position, activity, src_x=SRC_X, src_y=SRC_Y, eff=EFFICIENCY):
+async def calculate_count_rate(
+        x_position,
+        y_position,
+        activity,
+        background=BKG_ACTIVITY,
+        src_x=SRC_X,
+        src_y=SRC_Y,
+        eff=EFFICIENCY
+):
     dist = np.sqrt((x_position - src_x) ** 2 + (y_position - src_y) ** 2)
-    fluence_rate = (activity * SCALE * BRANCH_RATIO * eff * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
-    return fluence_rate
+    count_rate = (activity * SCALE * BRANCH_RATIO * eff * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
+    return np.int_(count_rate) + background
 
 
-async def calculate_fluence_rate_angular(x_position, y_position, activity, src_x=SRC_X, src_y=SRC_Y, eff=EFFICIENCY):
+async def calculate_count_rate_angular(
+        x_position,
+        y_position,
+        activity,
+        background=BKG_ACTIVITY,
+        src_x=SRC_X,
+        src_y=SRC_Y,
+        eff=EFFICIENCY):
     efficiency_df = formatter.get_dataframe(EFF_FILE)
     efficiency_interpolator = EfficiencyInterpolator(efficiency_df)
 
@@ -30,7 +46,7 @@ async def calculate_fluence_rate_angular(x_position, y_position, activity, src_x
     eff_rel = efficiency_interpolator.interpolate(calc_angles)
 
     angular_fluence_rate = (activity * SCALE * BRANCH_RATIO * eff * eff_rel * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
-    return angular_fluence_rate
+    return np.int_(angular_fluence_rate) + background
 
 
 async def make_normalization(data_to_normalize: pd.DataFrame):
