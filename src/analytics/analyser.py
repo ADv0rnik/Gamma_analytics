@@ -10,10 +10,10 @@ from src.utils import create_dataframe
 class Analyser:
     def __init__(
             self,
-            coordinates: Tuple[float, float] = None,
-            activity: int = 1000,
-            dist_predefined: bool = IS_FIXED_DISTANCE,
-            include_angles: bool = True
+            activity: float,
+            include_angles: bool,
+            coordinates: Tuple[np.ndarray, np.ndarray] = None,
+            dist_predefined: bool = IS_FIXED_DISTANCE
     ):
         self.coordinates = coordinates
         self.dist_predefined = dist_predefined

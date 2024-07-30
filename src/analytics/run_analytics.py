@@ -27,7 +27,7 @@ async def calculate_count_rate(
 ):
     dist = np.sqrt((x_position - src_x) ** 2 + (y_position - src_y) ** 2)
     count_rate = (activity * SCALE * BRANCH_RATIO * eff * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
-    return np.int_(count_rate) + background
+    return np.round(count_rate + background, 1)
 
 
 async def calculate_count_rate_angular(
@@ -38,15 +38,26 @@ async def calculate_count_rate_angular(
         src_x=SRC_X,
         src_y=SRC_Y,
         eff=EFFICIENCY):
+    """
+    This function is taking into account an angular distribution of the detector efficiency.
+    :param x_position: numpy array of x coordinates
+    :param y_position: numpy array of y coordinates
+    :param activity: Decimal value of the source activity performed in Bq
+    :param background: background activity performed in Bq
+    :param src_x: x position of the orphan source
+    :param src_y: y position of the orphan source
+    :param eff: reference efficiency of the detector
+    :return: array of the angular_count_rate
+    """
     efficiency_df = formatter.get_dataframe(EFF_FILE)
     efficiency_interpolator = EfficiencyInterpolator(efficiency_df)
 
     dist = np.sqrt((x_position - src_x) ** 2 + (y_position - src_y) ** 2)
-    calc_angles = calculate_angles(x_position, y_position, SRC_X, SRC_Y)
+    calc_angles = await calculate_angles(x_position, y_position, SRC_X, SRC_Y)
     eff_rel = efficiency_interpolator.interpolate(calc_angles)
 
-    angular_fluence_rate = (activity * SCALE * BRANCH_RATIO * eff * eff_rel * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
-    return np.int_(angular_fluence_rate) + background
+    angular_count_rate = (activity * SCALE * BRANCH_RATIO * eff * eff_rel * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
+    return np.round(angular_count_rate, 1) + background
 
 
 async def make_normalization(data_to_normalize: pd.DataFrame):

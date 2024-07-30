@@ -1,4 +1,6 @@
 import os
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 import zipfile
@@ -6,7 +8,19 @@ import zipfile
 from src.config import SRC_Y, SRC_X, OUTPUT_DIR
 
 
-def calculate_angles(
+async def simulate_coordinates(distance: int) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    The function defines the distance range (part of the road near the source)
+    Acquisition time is 1s.
+    :param distance: integer value representing the distance between the starting point and the destination.
+    :return: tuple of arrays
+    """
+    x_coordinates = np.arange(-distance, distance + 1, 1)
+    y_coordinates = np.zeros(len(x_coordinates))
+    return x_coordinates, y_coordinates
+
+
+async def calculate_angles(
         x_position: np.ndarray,
         y_position: np.ndarray,
         src_x=SRC_X,
@@ -48,9 +62,11 @@ async def create_dataframe(data: dict) -> pd.DataFrame:
 def zip_files(files: list[str]):
     basename, _ = os.path.splitext(files[0])
     zip_filename = f"{basename}.zip"
-    print(f"creating {zip_filename}")
+    print(f"Creating {zip_filename}")
 
     with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zip_f:
         for f in files:
             zip_f.write(filename=f, arcname=os.path.basename(f))
     return zip_filename
+
+

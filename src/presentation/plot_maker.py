@@ -40,3 +40,5 @@ def make_graph(data: pd.DataFrame, dist_predefined=IS_FIXED_DISTANCE, normalize=
         return {
             "plot": output_file
         }
+
+# TODO: Revoke make_graph function using OOP approach
