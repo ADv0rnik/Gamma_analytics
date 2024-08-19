@@ -5,6 +5,7 @@ from typing import Tuple
 from src.analytics.run_analytics import calculate_count_rate, calculate_count_rate_angular
 from src.config import IS_FIXED_DISTANCE, src_y_probe
 from src.utils import create_dataframe
+from scipy import integrate
 
 
 class Analyser:
@@ -33,6 +34,13 @@ class Analyser:
 
     @staticmethod
     async def __get_from_poisson(simulation_data):
+        """
+        This function generates random numbers from a Poisson distribution with a mean of ``simulation_data``.
+        The Poisson distribution models the probability of a given number of events occurring in a fixed interval of time or space,
+        given that these events occur with a known average rate. 
+        :param simulation_data: simulated from count rate model dataset
+        :return: array of poisson random count numbers
+        """
         pois_data = np.zeros_like(simulation_data)
         for i in range(len(simulation_data)):
             pois_data[i] = np.random.poisson(simulation_data[i], 1)[0]

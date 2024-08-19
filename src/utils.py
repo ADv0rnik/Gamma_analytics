@@ -8,7 +8,7 @@ import zipfile
 from src.config import SRC_Y, SRC_X, OUTPUT_DIR
 
 
-async def simulate_coordinates(distance: int) -> Tuple[np.ndarray, np.ndarray]:
+async def generate_coordinates(distance: int) -> Tuple[np.ndarray, np.ndarray]:
     """
     The function defines the distance range (part of the road near the source)
     Acquisition time is 1s.

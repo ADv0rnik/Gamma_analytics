@@ -1,6 +1,5 @@
 import os
-
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
 
 from src.analytics.analyser import Analyser
@@ -10,23 +9,19 @@ from src.config import (
     NORMALIZED,
     OUTPUT_DIR
 )
-from src.utils import zip_files, simulate_coordinates
+from src.utils import zip_files, generate_coordinates
+from .models import SimulationQueryParams
 
 analytics_router = APIRouter(tags=["analytics"])
 
 
 @analytics_router.get('/simulate')
-async def run_analytics(
-        make_plot: bool = False,
-        include_angles: bool = False,
-        dist: int = 300,
-        act: float = 100.0
-):
-    x_coord, y_coord = await simulate_coordinates(distance=dist)
+async def run_analytics(params: SimulationQueryParams = Depends()):
+    x_coord, y_coord = await generate_coordinates(distance=params.dist)
     analyser = Analyser(
-        activity=act,
+        activity=params.act,
         coordinates=(x_coord, y_coord),
-        include_angles=include_angles,
+        include_angles=params.include_angles,
     )
 
     csv_filename = os.path.join(OUTPUT_DIR, "simulated_data.csv")
@@ -36,7 +31,7 @@ async def run_analytics(
         df = await make_normalization(df)
 
     df.to_csv(csv_filename, index=False)
-    if make_plot:
+    if params.make_plot:
         result = make_graph(df)
         result["csv"] = csv_filename
         result_files = list(result.values())

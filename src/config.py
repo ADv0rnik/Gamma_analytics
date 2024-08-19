@@ -32,7 +32,7 @@ BKG_ACTIVITY = 5
 IS_FIXED_DISTANCE = True
 SRC_X = 0
 SRC_Y = 50
-STEP = 50
+STEP = 50 # for recalculating source to detector distance (in meters)
 
 # if the distance is not predefined (IS_FIXED_DISTANCE=False)
 SRC_Y_MIN = 50

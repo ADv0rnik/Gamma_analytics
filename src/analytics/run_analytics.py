@@ -27,7 +27,7 @@ async def calculate_count_rate(
 ):
     dist = np.sqrt((x_position - src_x) ** 2 + (y_position - src_y) ** 2)
     count_rate = (activity * SCALE * BRANCH_RATIO * eff * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
-    return np.round(count_rate + background, 1)
+    return np.round(count_rate, 2) + background
 
 
 async def calculate_count_rate_angular(
@@ -57,7 +57,7 @@ async def calculate_count_rate_angular(
     eff_rel = efficiency_interpolator.interpolate(calc_angles)
 
     angular_count_rate = (activity * SCALE * BRANCH_RATIO * eff * eff_rel * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
-    return np.round(angular_count_rate, 1) + background
+    return np.round(angular_count_rate, 2) + background
 
 
 async def make_normalization(data_to_normalize: pd.DataFrame):

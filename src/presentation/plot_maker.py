@@ -27,12 +27,12 @@ def make_graph(data: pd.DataFrame, dist_predefined=IS_FIXED_DISTANCE, normalize=
             filename = "plot_multi_normalized.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
             data.plot(x="x", y=columns_norm, xlabel="Distance / m", ylabel="Fluence rate", grid=True)
-            plt.savefig(OUTPUT_DIR, filename)
+            plt.savefig(output_file)
         else:
             filename = "plot_multi.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
             data.plot(x="x", y=columns)
-            plt.savefig(OUTPUT_DIR, filename)
+            plt.savefig(output_file)
     except TypeError as e:
         print(f"An error occurred while creating plot: {e}")
     else:
@@ -41,4 +41,6 @@ def make_graph(data: pd.DataFrame, dist_predefined=IS_FIXED_DISTANCE, normalize=
             "plot": output_file
         }
 
+
 # TODO: Revoke make_graph function using OOP approach
+# TODO: make_graph function processed wrong fields in the dataframe
