@@ -16,7 +16,7 @@ from src.config import (
 )
 
 
-async def calculate_count_rate(
+async def generate_count_rate(
         x_position,
         y_position,
         activity,
@@ -30,7 +30,7 @@ async def calculate_count_rate(
     return np.round(count_rate, 2) + background
 
 
-async def calculate_count_rate_angular(
+async def generate_count_rate_angular(
         x_position,
         y_position,
         activity,

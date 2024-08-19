@@ -13,14 +13,14 @@ from src.config import (
 def make_graph(data: pd.DataFrame, dist_predefined=IS_FIXED_DISTANCE, normalize=NORMALIZED) -> dict:
     figure, ax = plt.subplots(figsize=(16, 6))
     x = data["x"]
-    columns = [column for column in data.columns if column.startswith('sim') and not column.endswith('n')]
-    columns_norm = [column for column in data.columns if column.startswith('sim') and column.endswith('n')]
+    columns = [column for column in data.columns if column.startswith('generic') and not column.endswith('n')]
+    columns_norm = [column for column in data.columns if column.startswith('generic') and column.endswith('n')]
 
     try:
         if dist_predefined:
             filename = "plot_single.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
-            y = data["sim_data"]
+            y = data["generic_data"]
             ax.plot(x, y, lw=1)
             plt.savefig(output_file)
         elif normalize:
