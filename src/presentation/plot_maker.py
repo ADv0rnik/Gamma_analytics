@@ -20,7 +20,7 @@ def make_graph(data: pd.DataFrame, dist_predefined=IS_FIXED_DISTANCE, normalize=
         if dist_predefined:
             filename = "plot_single.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
-            y = data["generic_data"]
+            y = data["generic_count_rate"]
             ax.plot(x, y, lw=1)
             plt.savefig(output_file)
         elif normalize:

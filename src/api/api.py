@@ -2,8 +2,8 @@ import os
 from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
 
-from src.analytics.data_constructor import DataConstructor
-from src.analytics.run_analytics import make_normalization
+from src.data_generators.generator_factory import GeneratorFactory
+from src.utils import make_normalization
 from src.presentation.plot_maker import make_graph
 from src.config import (
     NORMALIZED,
@@ -17,18 +17,20 @@ analytics_router = APIRouter(tags=["analytics"])
 
 @analytics_router.get('/generate')
 async def run_analytics(params: GenerationQueryParams = Depends()):
+    csv_filename = os.path.join(OUTPUT_DIR, "generated_data.csv")
     x_coord, y_coord = await generate_coordinates(distance=params.dist)
-    analyser = DataConstructor(
+
+    factory = GeneratorFactory(
         activity=params.act,
         coordinates=(x_coord, y_coord),
         include_angles=params.include_angles,
         add_speed=params.add_speed,
+        road_span=params.dist,
         speed=params.speed,
         time=params.acq_time
     )
-
-    csv_filename = os.path.join(OUTPUT_DIR, "generated_data.csv")
-    df = await analyser.construct_data()
+    generator = await factory.return_data_generator()
+    df = await generator.generate_data()
 
     if NORMALIZED:
         df = await make_normalization(df)

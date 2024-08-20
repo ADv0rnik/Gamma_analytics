@@ -1,0 +1,58 @@
+import numpy as np
+
+from src.data_generators.base_data_generator import BaseDataGenerator
+from src.config import (
+    SCALE,
+    BRANCH_RATIO,
+    IS_FIXED_DISTANCE,
+    mu_air,
+    SRC_X,
+    SRC_Y,
+    EFFICIENCY,
+    BKG_ACTIVITY
+)
+
+
+class VelocityDataGenerator(BaseDataGenerator):
+    def __init__(self, **kwargs):
+        self.coordinates = kwargs["coordinates"]
+        self.dist_predefined = IS_FIXED_DISTANCE
+        self.activity = kwargs["activity"]
+        self.background = BKG_ACTIVITY,
+        self.src_x = SRC_X,
+        self.src_y = SRC_Y,
+        self.eff = EFFICIENCY
+        self.speed = kwargs["speed"]
+        self.span = kwargs["road_span"]
+        self.time = kwargs["time"]
+
+    async def generate_data(self):
+        data_dict = {}
+        if self.dist_predefined:
+            gen_data, x_coord, y_coord = await self.generate_count_rate_acquisition_time()
+            data_dict["generic_count_rate"] = gen_data
+            data_dict["pois_data"] = await self.get_from_poisson(gen_data)
+            data_dict["x"] = x_coord
+            data_dict["y"] = y_coord
+
+    async def get_from_poisson(self, generated_data):
+        """
+        This function generates random numbers from a Poisson distribution with a mean of ``generated_data``.
+        The Poisson distribution models the probability of a given number of events occurring in a fixed interval of time or space,
+        given that these events occur with a known average rate.
+        :param generated_data: simulated from count rate model dataset
+        :return: array of poisson random count numbers
+        """
+        pois_data = np.zeros_like(generated_data)
+        for i in range(len(generated_data)):
+            pois_data[i] = np.random.poisson(generated_data[i], 1)[0]
+        return pois_data
+
+    async def generate_count_rate_acquisition_time(self):
+        x_position = np.arange(-self.span, self.span + (self.speed * self.time * self.span), self.speed * self.time)[:self.span]
+        y_position = self.coordinates[1][:self.span]
+
+        dist = np.sqrt((x_position - self.src_x) ** 2 + (y_position - self.src_y) ** 2)
+        count_rate = ((self.activity * SCALE * BRANCH_RATIO * EFFICIENCY * np.exp(-mu_air * dist)) / (
+                    4 * np.pi * dist ** 2)) * self.time
+        return np.round(count_rate * self.time, 2) + self.background, x_position, y_position
