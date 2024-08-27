@@ -1,10 +1,9 @@
 import os
-from typing import Tuple
-
 import numpy as np
 import pandas as pd
 import zipfile
 
+from typing import Tuple
 from src.config import SRC_Y, SRC_X, OUTPUT_DIR
 
 
@@ -68,5 +67,13 @@ def zip_files(files: list[str]):
         for f in files:
             zip_f.write(filename=f, arcname=os.path.basename(f))
     return zip_filename
+
+
+async def make_normalization(data_to_normalize: pd.DataFrame):
+    only_gen_data = data_to_normalize.iloc[:, 2::1]
+    norm_data = only_gen_data.apply(lambda x: x / x.max(), axis=0)
+    for i, column in enumerate(norm_data.columns):
+        norm_data.rename(columns={column: column + "_n"}, inplace=True)
+    return pd.concat([data_to_normalize, norm_data], axis=1)
 
 
