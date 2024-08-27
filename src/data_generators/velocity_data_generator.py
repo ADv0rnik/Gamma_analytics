@@ -11,6 +11,7 @@ from src.config import (
     EFFICIENCY,
     BKG_ACTIVITY
 )
+from src.utils import create_dataframe
 
 
 class VelocityDataGenerator(BaseDataGenerator):
@@ -30,10 +31,11 @@ class VelocityDataGenerator(BaseDataGenerator):
         data_dict = {}
         if self.dist_predefined:
             gen_data, x_coord, y_coord = await self.generate_count_rate_acquisition_time()
+            data_dict["x"] = np.round(x_coord,0)
+            data_dict["y"] = y_coord
             data_dict["generic_count_rate"] = gen_data
             data_dict["pois_data"] = await self.get_from_poisson(gen_data)
-            data_dict["x"] = x_coord
-            data_dict["y"] = y_coord
+            return await create_dataframe(data_dict)
 
     async def get_from_poisson(self, generated_data):
         """

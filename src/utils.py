@@ -70,8 +70,8 @@ def zip_files(files: list[str]):
 
 
 async def make_normalization(data_to_normalize: pd.DataFrame):
-    only_sim_data = data_to_normalize.iloc[:, 2::1]
-    norm_data = only_sim_data.apply(lambda x: x / x.max(), axis=0)
+    only_gen_data = data_to_normalize.iloc[:, 2::1]
+    norm_data = only_gen_data.apply(lambda x: x / x.max(), axis=0)
     for i, column in enumerate(norm_data.columns):
         norm_data.rename(columns={column: column + "_n"}, inplace=True)
     return pd.concat([data_to_normalize, norm_data], axis=1)
