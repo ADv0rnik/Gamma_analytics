@@ -4,27 +4,34 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from dataclasses import dataclass
 
-from src.config import OUTPUT_DIR
+from src.config import OUTPUT_DIR, STEP
 
 GRID_PARAMS = {
     "linestyle":'-',
     "linewidth":1
 }
-
 FONT_PARAMS = {
-    'fontsize': 18,
-    'fontweight': 'bold',
+    'fontsize': 16,
+    'fontweight': 'normal',
     'family': 'sans-serif',
-    'color': 'darkblue',
     'fontstyle': 'normal'
 }
-
+TITLE_PARAMS = {
+    'fontsize': 18,
+    'fontweight': 'bold',
+    'color': 'darkblue',
+    'family': 'sans-serif',
+    'fontstyle': 'normal'
+}
 LEGEND_PARAMS = {
     "family": "sans-serif",
     "weight": "normal",
     "size": 14
 }
-
+LABELS = {
+    "x": "Distance / m",
+    "y": "Count rate",
+}
 LEGEND = True
 
 
@@ -32,26 +39,25 @@ LEGEND = True
 class PlotMaker:
     data: pd.DataFrame
 
-    def make_single(self, **kwargs) -> str:
+    def plot_default_count_rate(self, **kwargs) -> str:
         output_file = None
+        legend = "Count rate"
+
         figure, ax = plt.subplots(figsize=(16, 6))
+        x = self.data["x"]
         dist_predefined = kwargs["dist_predefined"]
         normalized = kwargs["normalized"]
 
         columns = [column for column in self.data.columns if column.startswith('generic') and not column.endswith('n')]
         columns_norm = [column for column in self.data.columns if column.startswith('generic') and column.endswith('n')]
         if dist_predefined and not normalized:
-
             title = "Count rate with predefined distance"
-            legend = "Count rate"
-
             filename = "default_plot_non_normalized.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
-            x = self.data["x"]
             y = self.data["generic_count_rate"]
 
             self.__set_ax_params(ax, title)
-            ax.plot(x, y, lw=1)
+            ax.plot(x, y, lw=2, color="red")
 
             plt.legend([legend], frameon=False, prop=LEGEND_PARAMS)
             plt.savefig(output_file)
@@ -59,22 +65,34 @@ class PlotMaker:
             title = "Count rate with predefined distance (Normalized)"
             filename = "default_plot_normalized.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
-            x = self.data["x"]
             y = self.data["generic_count_rate_n"]
 
             self.__set_ax_params(ax, title)
-            ax.plot(x, y, lw=1)
+            ax.plot(x, y, lw=2, color="red")
 
+            plt.legend([legend], frameon=False, prop=LEGEND_PARAMS)
             plt.savefig(output_file)
         if not dist_predefined and not normalized:
+            title = f"Count rate with distance {STEP} m step"
             filename = "default_multiplot_non_normalized.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
-            self.data.plot(x="x", y=columns)
+
+            self.__set_ax_params(ax, title)
+            for column in columns:
+                ax.plot(self.data["x"], self.data[column], lw=2)
+
+            plt.legend(columns, frameon=False, prop=LEGEND_PARAMS)
             plt.savefig(output_file)
         if not dist_predefined and normalized:
+            title = f"Count rate with distance {STEP} m step (Normalized)"
             filename = "default_multiplot_normalized.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
-            self.data.plot(x="x", y=columns_norm, xlabel="Distance / m", ylabel="Count rate, cps", grid=True)
+
+            self.__set_ax_params(ax, title)
+            for column in columns_norm:
+                ax.plot(x, self.data[column], lw=2)
+
+            plt.legend(columns_norm, frameon=False, prop=LEGEND_PARAMS)
             plt.savefig(output_file)
 
         plt.close(figure)
@@ -84,10 +102,12 @@ class PlotMaker:
     def __set_ax_params(axes, title):
         """
         Set parameters for the plot
-        :return:
+        :return: None
         """
         axes.spines.top.set_visible(False)
         axes.spines.right.set_visible(False)
-
+        axes.tick_params(axis='both', length=5.0, labelsize=12)
         axes.grid(True, which='major', axis='y', **GRID_PARAMS)
-        axes.set_title(title, fontdict=FONT_PARAMS)
+        axes.set_title(title, fontdict=TITLE_PARAMS)
+        axes.set_ylabel(LABELS["y"], fontdict=FONT_PARAMS)
+        axes.set_xlabel(LABELS["x"], fontdict=FONT_PARAMS)

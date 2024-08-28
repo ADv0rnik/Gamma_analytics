@@ -24,7 +24,7 @@ async def run_data_generation(**kwargs) -> dict[str, Any]:
 
         if kwargs["make_plot"]:
             plot_generator = PlotMaker(dataframe)
-            fig = plot_generator.make_single(
+            fig = plot_generator.plot_default_count_rate(
                 normalized=NORMALIZED,
                 dist_predefined=IS_FIXED_DISTANCE
             )
