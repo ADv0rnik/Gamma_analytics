@@ -12,9 +12,17 @@ GRID_PARAMS = {
 }
 
 FONT_PARAMS = {
-    "fontsize": 14,
-    "fontweight": "bold",
-    "fontfamily": "Arial",
+    'fontsize': 18,
+    'fontweight': 'bold',
+    'family': 'sans-serif',
+    'color': 'darkblue',
+    'fontstyle': 'normal'
+}
+
+LEGEND_PARAMS = {
+    "family": "sans-serif",
+    "weight": "normal",
+    "size": 14
 }
 
 LEGEND = True
@@ -35,6 +43,7 @@ class PlotMaker:
         if dist_predefined and not normalized:
 
             title = "Count rate with predefined distance"
+            legend = "Count rate"
 
             filename = "default_plot_non_normalized.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
@@ -44,6 +53,7 @@ class PlotMaker:
             self.__set_ax_params(ax, title)
             ax.plot(x, y, lw=1)
 
+            plt.legend([legend], frameon=False, prop=LEGEND_PARAMS)
             plt.savefig(output_file)
         if dist_predefined and normalized:
             title = "Count rate with predefined distance (Normalized)"
@@ -79,6 +89,5 @@ class PlotMaker:
         axes.spines.top.set_visible(False)
         axes.spines.right.set_visible(False)
 
-        axes.legend()
         axes.grid(True, which='major', axis='y', **GRID_PARAMS)
-        axes.set_title(title, fontweight ="bold")
+        axes.set_title(title, fontdict=FONT_PARAMS)
