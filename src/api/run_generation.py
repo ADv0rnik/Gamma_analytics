@@ -21,7 +21,7 @@ async def run_data_generation(**kwargs) -> dict[str, Any]:
         velocity_data_generator = VelocityDataGenerator(**kwargs)
         df = await return_data_from_generator(velocity_data_generator)
         if kwargs["make_plot"]:
-            return await return_dataplot(df)
+            return await return_dataplot(df, speed=kwargs["speed"], time=kwargs["time"])
         else:
             return {"data": df}
     else:
@@ -41,10 +41,13 @@ async def return_data_from_generator(data_generator: BaseDataGenerator) -> pd.Da
     return dataframe
 
 
-async def return_dataplot(dataframe: pd.DataFrame) -> dict[str, Any]:
+async def return_dataplot(dataframe: pd.DataFrame, **kwargs) -> dict[str, Any]:
     plot_generator = PlotMaker(dataframe)
     if IS_POISSON:
-        fig = plot_generator.plot_poisson()
+        fig = plot_generator.plot_poisson(
+            speed=kwargs["speed"],
+            time=kwargs["time"]
+        )
     else:
         fig = plot_generator.plot_count_rate(
             normalized=NORMALIZED,

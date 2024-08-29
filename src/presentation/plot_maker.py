@@ -46,10 +46,9 @@ class PlotMaker:
         x = self.data["x"]
         dist_predefined = kwargs["dist_predefined"]
         normalized = kwargs["normalized"]
-
-
         columns = [column for column in self.data.columns if column.startswith('generic') and not column.endswith('n')]
         columns_norm = [column for column in self.data.columns if column.startswith('generic') and column.endswith('n')]
+
         if dist_predefined and not normalized:
             title = f"Count rate with predefined distance of {SRC_Y} meters"
             filename = "default_plot_non_normalized.png"
@@ -98,12 +97,12 @@ class PlotMaker:
         plt.close(figure)
         return self.output_file
 
-    def plot_poisson(self) -> str:
+    def plot_poisson(self, **kwargs) -> str:
         figure, ax = plt.subplots(figsize=(16, 6))
         x = self.data["x"]
         y = self.data["pois_data"]
 
-        title = "Poisson distribution for count rate"
+        title = f"Poisson distribution for count rate (Speed: {kwargs['speed']} m per sec, Acquisition time: {kwargs['time']} sec)"
         filename = "poisson_plot.png"
         self.output_file = os.path.join(OUTPUT_DIR, filename)
         self.__set_ax_params(ax, title)
