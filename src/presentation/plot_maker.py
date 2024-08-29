@@ -4,7 +4,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from dataclasses import dataclass
 
-from src.config import OUTPUT_DIR, STEP
+from src.config import OUTPUT_DIR, STEP, SRC_Y
 
 GRID_PARAMS = {
     "linestyle":'-',
@@ -29,7 +29,7 @@ LEGEND_PARAMS = {
     "size": 14
 }
 LABELS = {
-    "x": "Distance / m",
+    "x": "Distance, m",
     "y": "Count rate",
 }
 LEGEND = True
@@ -39,7 +39,7 @@ LEGEND = True
 class PlotMaker:
     data: pd.DataFrame
 
-    def plot_default_count_rate(self, **kwargs) -> str:
+    def plot_count_rate(self, **kwargs) -> str:
         output_file = None
         legend = "Count rate"
 
@@ -51,7 +51,7 @@ class PlotMaker:
         columns = [column for column in self.data.columns if column.startswith('generic') and not column.endswith('n')]
         columns_norm = [column for column in self.data.columns if column.startswith('generic') and column.endswith('n')]
         if dist_predefined and not normalized:
-            title = "Count rate with predefined distance"
+            title = f"Count rate with predefined distance of {SRC_Y} meters"
             filename = "default_plot_non_normalized.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
             y = self.data["generic_count_rate"]
@@ -62,7 +62,7 @@ class PlotMaker:
             plt.legend([legend], frameon=False, prop=LEGEND_PARAMS)
             plt.savefig(output_file)
         if dist_predefined and normalized:
-            title = "Count rate with predefined distance (Normalized)"
+            title = f"Count rate with predefined distance of {SRC_Y} meters (Normalized)"
             filename = "default_plot_normalized.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
             y = self.data["generic_count_rate_n"]
@@ -73,7 +73,7 @@ class PlotMaker:
             plt.legend([legend], frameon=False, prop=LEGEND_PARAMS)
             plt.savefig(output_file)
         if not dist_predefined and not normalized:
-            title = f"Count rate with distance {STEP} m step"
+            title = f"Count Rate vs. Distance (Source to detector distance step: {STEP} m.)"
             filename = "default_multiplot_non_normalized.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
 
@@ -84,7 +84,7 @@ class PlotMaker:
             plt.legend(columns, frameon=False, prop=LEGEND_PARAMS)
             plt.savefig(output_file)
         if not dist_predefined and normalized:
-            title = f"Count rate with distance {STEP} m step (Normalized)"
+            title = f"Normalized count rate vs. Distance (Source to detector distance step: {STEP} m.)"
             filename = "default_multiplot_normalized.png"
             output_file = os.path.join(OUTPUT_DIR, filename)
 

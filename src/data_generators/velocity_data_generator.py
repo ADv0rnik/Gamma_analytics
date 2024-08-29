@@ -1,3 +1,5 @@
+import asyncio
+
 import numpy as np
 
 from src.data_generators.base_data_generator import BaseDataGenerator
@@ -9,7 +11,7 @@ from src.config import (
     SRC_X,
     SRC_Y,
     EFFICIENCY,
-    BKG_ACTIVITY
+    BKG_ACTIVITY, src_y_probe
 )
 from src.utils import create_dataframe
 
@@ -21,21 +23,32 @@ class VelocityDataGenerator(BaseDataGenerator):
         self.activity = kwargs["activity"]
         self.background = BKG_ACTIVITY,
         self.src_x = SRC_X,
-        self.src_y = SRC_Y,
         self.eff = EFFICIENCY
         self.speed = kwargs["speed"]
         self.span = kwargs["road_span"]
         self.time = kwargs["time"]
 
+    async def __get_dist_arrays(self):
+        jobs = []
+        for probe in src_y_probe.values():
+            jobs.append(asyncio.create_task(self.__generate_count_rate_acquisition_time(src_y=probe)))
+        return await asyncio.gather(*jobs)
+
     async def generate_data(self):
         data_dict = {}
         if self.dist_predefined:
-            gen_data, x_coord, y_coord = await self.generate_count_rate_acquisition_time()
+            gen_data, x_coord, y_coord = await self.__generate_count_rate_acquisition_time()
             data_dict["x"] = np.round(x_coord,0)
             data_dict["y"] = y_coord
             data_dict["generic_count_rate"] = gen_data
             data_dict["pois_data"] = await self.get_from_poisson(gen_data)
-            return await create_dataframe(data_dict)
+        else:
+            dist_dataset = await self.__get_dist_arrays()
+            for i, item in enumerate(dist_dataset):
+                data_dict["x"] = np.round(item[1],0)
+                data_dict["y"] = item[2]
+                data_dict[f"generic_data_{src_y_probe[i]}"] = item[0]
+        return await create_dataframe(data_dict)
 
     async def get_from_poisson(self, generated_data):
         """
@@ -50,11 +63,11 @@ class VelocityDataGenerator(BaseDataGenerator):
             pois_data[i] = np.random.poisson(generated_data[i], 1)[0]
         return pois_data
 
-    async def generate_count_rate_acquisition_time(self):
+    async def __generate_count_rate_acquisition_time(self, src_y=SRC_Y):
         x_position = np.arange(-self.span, self.span + (self.speed * self.time * self.span), self.speed * self.time)[:self.span]
         y_position = self.coordinates[1][:self.span]
 
-        dist = np.sqrt((x_position - self.src_x) ** 2 + (y_position - self.src_y) ** 2)
+        dist = np.sqrt((x_position - self.src_x) ** 2 + (y_position - src_y) ** 2)
         count_rate = ((self.activity * SCALE * BRANCH_RATIO * EFFICIENCY * np.exp(-mu_air * dist)) / (
                     4 * np.pi * dist ** 2)) * self.time
         return np.round(count_rate * self.time, 2) + self.background, x_position, y_position
