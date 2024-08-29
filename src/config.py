@@ -14,12 +14,13 @@ ENV_PATH = os.path.join(BASE_DIR, '.env')
 
 ATTENUATION_FILE = os.path.join(BASE_DIR, "nuclib", "attenuation_table.csv")
 EFF_FILE = os.path.join(BASE_DIR, "nuclib", "relative_efficiency_HPGe.csv")
-IS_POISSON = True # Set this parameter to True if Poisson distribution is needed
 
 if not os.path.exists(OUTPUT_DIR):
     os.mkdir(OUTPUT_DIR)
 
-NORMALIZED = False
+# Distribution settings
+NORMALIZED = True
+IS_POISSON = True # Set this parameter to True if Poisson distribution is needed
 
 # Source params for ceasium-137
 BRANCH_RATIO = BranchingRatio.CS_137.value

@@ -8,7 +8,8 @@ from src.data_generators.base_data_generator import BaseDataGenerator
 from src.presentation.plot_maker import PlotMaker
 from src.config import (
     NORMALIZED,
-    IS_FIXED_DISTANCE
+    IS_FIXED_DISTANCE,
+    IS_POISSON
 )
 from src.utils import make_normalization
 
@@ -42,10 +43,13 @@ async def return_data_from_generator(data_generator: BaseDataGenerator) -> pd.Da
 
 async def return_dataplot(dataframe: pd.DataFrame) -> dict[str, Any]:
     plot_generator = PlotMaker(dataframe)
-    fig = plot_generator.plot_count_rate(
-        normalized=NORMALIZED,
-        dist_predefined=IS_FIXED_DISTANCE
-    )
+    if IS_POISSON:
+        fig = plot_generator.plot_poisson()
+    else:
+        fig = plot_generator.plot_count_rate(
+            normalized=NORMALIZED,
+            dist_predefined=IS_FIXED_DISTANCE
+        )
     return {
         "figure": fig,
         "data": dataframe

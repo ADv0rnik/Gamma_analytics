@@ -38,65 +38,81 @@ LEGEND = True
 @dataclass
 class PlotMaker:
     data: pd.DataFrame
+    output_file: str = None
+    legend: str = "Count rate"
 
     def plot_count_rate(self, **kwargs) -> str:
-        output_file = None
-        legend = "Count rate"
-
         figure, ax = plt.subplots(figsize=(16, 6))
         x = self.data["x"]
         dist_predefined = kwargs["dist_predefined"]
         normalized = kwargs["normalized"]
+
 
         columns = [column for column in self.data.columns if column.startswith('generic') and not column.endswith('n')]
         columns_norm = [column for column in self.data.columns if column.startswith('generic') and column.endswith('n')]
         if dist_predefined and not normalized:
             title = f"Count rate with predefined distance of {SRC_Y} meters"
             filename = "default_plot_non_normalized.png"
-            output_file = os.path.join(OUTPUT_DIR, filename)
+            self.output_file = os.path.join(OUTPUT_DIR, filename)
             y = self.data["generic_count_rate"]
 
             self.__set_ax_params(ax, title)
             ax.plot(x, y, lw=2, color="red")
 
-            plt.legend([legend], frameon=False, prop=LEGEND_PARAMS)
-            plt.savefig(output_file)
+            plt.legend([self.legend], frameon=False, prop=LEGEND_PARAMS)
+            plt.savefig(self.output_file)
         if dist_predefined and normalized:
             title = f"Count rate with predefined distance of {SRC_Y} meters (Normalized)"
             filename = "default_plot_normalized.png"
-            output_file = os.path.join(OUTPUT_DIR, filename)
+            self.output_file = os.path.join(OUTPUT_DIR, filename)
             y = self.data["generic_count_rate_n"]
 
             self.__set_ax_params(ax, title)
             ax.plot(x, y, lw=2, color="red")
 
-            plt.legend([legend], frameon=False, prop=LEGEND_PARAMS)
-            plt.savefig(output_file)
+            plt.legend([self.legend], frameon=False, prop=LEGEND_PARAMS)
+            plt.savefig(self.output_file)
         if not dist_predefined and not normalized:
             title = f"Count Rate vs. Distance (Source to detector distance step: {STEP} m.)"
             filename = "default_multiplot_non_normalized.png"
-            output_file = os.path.join(OUTPUT_DIR, filename)
+            self.output_file = os.path.join(OUTPUT_DIR, filename)
 
             self.__set_ax_params(ax, title)
             for column in columns:
                 ax.plot(self.data["x"], self.data[column], lw=2)
 
             plt.legend(columns, frameon=False, prop=LEGEND_PARAMS)
-            plt.savefig(output_file)
+            plt.savefig(self.output_file)
         if not dist_predefined and normalized:
             title = f"Normalized count rate vs. Distance (Source to detector distance step: {STEP} m.)"
             filename = "default_multiplot_normalized.png"
-            output_file = os.path.join(OUTPUT_DIR, filename)
+            self.output_file = os.path.join(OUTPUT_DIR, filename)
 
             self.__set_ax_params(ax, title)
             for column in columns_norm:
                 ax.plot(x, self.data[column], lw=2)
 
             plt.legend(columns_norm, frameon=False, prop=LEGEND_PARAMS)
-            plt.savefig(output_file)
+            plt.savefig(self.output_file)
 
         plt.close(figure)
-        return output_file
+        return self.output_file
+
+    def plot_poisson(self) -> str:
+        figure, ax = plt.subplots(figsize=(16, 6))
+        x = self.data["x"]
+        y = self.data["pois_data"]
+
+        title = "Poisson distribution for count rate"
+        filename = "poisson_plot.png"
+        self.output_file = os.path.join(OUTPUT_DIR, filename)
+        self.__set_ax_params(ax, title)
+        ax.plot(x, y, lw=2, color="red")
+
+        plt.legend([self.legend], frameon=False, prop=LEGEND_PARAMS)
+        plt.savefig(self.output_file)
+        plt.close(figure)
+        return self.output_file
 
     @staticmethod
     def __set_ax_params(axes, title):
