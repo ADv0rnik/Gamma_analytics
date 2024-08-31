@@ -18,8 +18,9 @@ EFF_FILE = os.path.join(BASE_DIR, "nuclib", "relative_efficiency_HPGe.csv")
 if not os.path.exists(OUTPUT_DIR):
     os.mkdir(OUTPUT_DIR)
 
+# Distribution settings
 NORMALIZED = True
-CALCULATE_ANGLES = False
+IS_POISSON = True # Set this parameter to True if Poisson distribution is needed
 
 # Source params for ceasium-137
 BRANCH_RATIO = BranchingRatio.CS_137.value

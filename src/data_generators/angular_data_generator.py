@@ -1,3 +1,5 @@
+import asyncio
+
 import numpy as np
 
 from src.data_generators.base_data_generator import BaseDataGenerator
@@ -9,7 +11,7 @@ from src.config import (
     SRC_X,
     SRC_Y,
     EFFICIENCY,
-    BKG_ACTIVITY, EFF_FILE
+    BKG_ACTIVITY, EFF_FILE, src_y_probe
 )
 from src.tools.data_formatter import formatter
 from src.tools.interpolators import EfficiencyInterpolator
@@ -26,6 +28,17 @@ class AngularDataGenerator(BaseDataGenerator):
         self.src_y = SRC_Y,
         self.eff = EFFICIENCY
 
+    async def __get_dist_arrays(self):
+        jobs = []
+        for probe in src_y_probe.values():
+            jobs.append(asyncio.create_task(self.generate_count_rate_angular(
+                self.coordinates[0],
+                self.coordinates[1],
+                src_y=probe,
+                activity=self.activity
+            )))
+        return await asyncio.gather(*jobs)
+
     async def generate_data(self):
         data_dict = {'x': self.coordinates[0], 'y': self.coordinates[1]}
         if self.dist_predefined:
@@ -36,7 +49,12 @@ class AngularDataGenerator(BaseDataGenerator):
             )
             data_dict["generic_count_rate"] = gen_data
             data_dict["pois_data"] = await self.get_from_poisson(gen_data)
-            return await create_dataframe(data_dict)
+
+        else:
+            dist_dataset = await self.__get_dist_arrays()
+            for i, item in enumerate(dist_dataset):
+                data_dict[f"generic_data_{src_y_probe[i]}"] = item
+        return await create_dataframe(data_dict)
 
     async def get_from_poisson(self, generated_data):
         """
