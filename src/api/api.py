@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from src.config import OUTPUT_DIR
 from src.utils import zip_files, generate_coordinates
 from src.api.run_generation import run_data_generation
-from .models import GenerationQueryParams
+from .models import GenerationQueryParams, SimulationQueryParams
 
 analytics_router = APIRouter(tags=["analytics"])
 
@@ -43,7 +43,12 @@ async def run_analytics(params: GenerationQueryParams = Depends()):
                 make_plot=False
             )
             result["data"].to_csv(csv_filename, index=False)
+            print(result)
             zip_file = zip_files([csv_filename])
             return FileResponse(path=zip_file, filename=os.path.basename(zip_file), media_type="application/zip")
     except AttributeError as e:
         return HTTPException(status_code=500, detail=str(e))
+
+@analytics_router.get('/simulate')
+async def run_simulation(sim_params: SimulationQueryParams = Depends()):
+    pass

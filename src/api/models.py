@@ -19,3 +19,18 @@ class GenerationQueryParams:
         self.add_speed = add_speed
         self.speed = speed
         self.acq_time = acq_time
+
+class SimulationQueryParams:
+    def __init__(
+            self,
+            sim_number: int = Query(default=10000, description="Number of simulations"),
+            init_x_pos: int = Query(default=0, description="Initial x position of the source"),
+            init_y_pos: int = Query(default=0, description="Initial y position of the source"),
+            init_activity: int = Query(default=0, description="Initial activity (MBq)"),
+            init_bkg: int = Query(default=0, description="Initial background level (cps)"),
+    ):
+        self.sim_number = sim_number
+        self.init_x_pos = init_x_pos
+        self.init_y_pos = init_y_pos
+        self.init_activity = init_activity
+        self.init_bkg = init_bkg
