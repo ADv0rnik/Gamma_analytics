@@ -25,7 +25,8 @@ class VelocityDataGenerator(BaseDataGenerator):
         self.src_x = SRC_X,
         self.eff = EFFICIENCY
         self.speed = kwargs["speed"]
-        self.span = kwargs["road_span"]
+        self.start_point = kwargs["start_point"]
+        self.span = kwargs["num_points"]
         self.time = kwargs["time"]
 
     async def __get_dist_arrays(self):
@@ -64,10 +65,11 @@ class VelocityDataGenerator(BaseDataGenerator):
         return pois_data
 
     async def __generate_count_rate_acquisition_time(self, src_y=SRC_Y):
-        x_position = np.arange(-self.span, self.span + (self.speed * self.time * self.span), self.speed * self.time)[:self.span]
-        y_position = self.coordinates[1][:self.span]
+        x_position = np.arange(self.start_point, self.start_point + (self.speed * self.time * self.span), self.speed * self.time)
+        y_position = np.zeros(self.span)
 
         dist = np.sqrt((x_position - self.src_x) ** 2 + (y_position - src_y) ** 2)
         count_rate = ((self.activity * SCALE * BRANCH_RATIO * EFFICIENCY * np.exp(-mu_air * dist)) / (
                     4 * np.pi * dist ** 2)) * self.time
-        return np.round(count_rate * self.time, 2) + self.background, x_position, y_position
+
+        return np.round(count_rate, 2) + self.background, x_position, y_position

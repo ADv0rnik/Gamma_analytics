@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 
@@ -6,12 +7,13 @@ from src.config import OUTPUT_DIR
 from src.utils import zip_files, generate_coordinates
 from src.api.run_generation import run_data_generation
 from .models import GenerationQueryParams, SimulationQueryParams
+from src.analytics.distributions import calculate_posterior_log
 
 analytics_router = APIRouter(tags=["analytics"])
 
 
 @analytics_router.get('/generate')
-async def run_analytics(params: GenerationQueryParams = Depends()):
+async def run_generation(params: GenerationQueryParams = Depends()):
     csv_filename = os.path.join(OUTPUT_DIR, "generated_data.csv")
     x_coord, y_coord = await generate_coordinates(distance=params.dist)
     try:
@@ -21,7 +23,8 @@ async def run_analytics(params: GenerationQueryParams = Depends()):
                 coordinates=(x_coord, y_coord),
                 include_angles=params.include_angles,
                 add_speed=params.add_speed,
-                road_span=params.dist,
+                start_point=params.dist,
+                num_points = params.num_points,
                 speed=params.speed,
                 time=params.acq_time,
                 make_plot=True
@@ -43,7 +46,6 @@ async def run_analytics(params: GenerationQueryParams = Depends()):
                 make_plot=False
             )
             result["data"].to_csv(csv_filename, index=False)
-            print(result)
             zip_file = zip_files([csv_filename])
             return FileResponse(path=zip_file, filename=os.path.basename(zip_file), media_type="application/zip")
     except AttributeError as e:
@@ -51,4 +53,16 @@ async def run_analytics(params: GenerationQueryParams = Depends()):
 
 @analytics_router.get('/simulate')
 async def run_simulation(sim_params: SimulationQueryParams = Depends()):
-    pass
+    try:
+        generated_data = pd.read_csv(os.path.join(OUTPUT_DIR, "generated_data.csv"))
+    except FileNotFoundError as e:
+        return HTTPException(status_code=500, detail=str(e))
+    else:
+        res = await calculate_posterior_log(
+            generated_data,
+            sim_params.init_x_pos,
+            sim_params.init_y_pos,
+            sim_params.init_activity,
+            sim_params.init_bkg
+        )
+        return {"result": res}
