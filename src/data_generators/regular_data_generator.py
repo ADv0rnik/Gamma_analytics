@@ -11,7 +11,7 @@ from src.config import (
     SRC_X,
     SRC_Y,
     EFFICIENCY,
-    BKG_ACTIVITY
+    BKG_COUNT_RATE
 )
 from src.utils import create_dataframe
 
@@ -21,7 +21,7 @@ class RegularDataGenerator(BaseDataGenerator):
         self.coordinates = kwargs["coordinates"]
         self.dist_predefined = IS_FIXED_DISTANCE
         self.activity = kwargs["activity"]
-        self.background = BKG_ACTIVITY,
+        self.background = BKG_COUNT_RATE,
         self.src_x = SRC_X,
         self.src_y = SRC_Y,
         self.eff = EFFICIENCY

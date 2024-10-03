@@ -2,11 +2,11 @@ import numpy as np
 import pandas as pd
 
 from scipy.stats import gamma, norm, poisson
-from src.config import SCALE
+from src.config import SCALE, BKG_COUNT_RATE
 from src.data_generators.regular_data_generator import RegularDataGenerator
 
 
-async def calculate_prior_log(act, mu_bkg=10):
+async def calculate_prior_log(act, mu_bkg):
     if min(act, mu_bkg) < 0:
         return -np.inf
 
@@ -17,7 +17,8 @@ async def calculate_prior_log(act, mu_bkg=10):
 
     return log_prior
 
-async def calculate_likelihood_log(data: pd.DataFrame, x, y, act, mu_bkg):
+async def calculate_likelihood_log(lambda_params: tuple, data: pd.DataFrame):
+    x, y, act, mu_bkg = lambda_params
     if min(act, mu_bkg) < 0:
         return -np.inf
 

@@ -26,13 +26,13 @@ IS_POISSON = True # Set this parameter to True if Poisson distribution is needed
 BRANCH_RATIO = BranchingRatio.CS_137.value
 SOURCE_ENERGY = Energy.CS_137.value  # in KeV
 SCALE = 1e6
-BKG_ACTIVITY = 10# in cps
+BKG_COUNT_RATE = 10# in cps
 
 # Position of the orphan source within Cartesian coordinate system.
 # Use IS_FIXED_DISTANCE=True if the distance from the road to the source (SRC_X and SRC_Y) is specified.
 IS_FIXED_DISTANCE = True
 SRC_X = 0
-SRC_Y = 40
+SRC_Y = 60
 STEP = 20 # for recalculating source to detector distance (in meters)
 
 # if the distance is not predefined (IS_FIXED_DISTANCE=False)
@@ -41,7 +41,7 @@ SRC_Y_MAX = 100
 src_y_probe = {i: dist for i, dist in enumerate(range(SRC_Y_MIN, SRC_Y_MAX, STEP))}
 
 # Detector params
-EFFICIENCY = 0.00216  # from R. Finck calculations
+EFFICIENCY = 0.02  # from R. Finck calculations 0.00216
 
 attenuation_df = formatter.get_dataframe(ATTENUATION_FILE)
 attenuation_interpolator = AttenuationInterpolator(attenuation_df)

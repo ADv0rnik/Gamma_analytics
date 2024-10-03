@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse
 from src.config import OUTPUT_DIR
 from src.utils import zip_files, generate_coordinates
 from src.api.run_generation import run_data_generation
+from src.api.run_simulation import run_mcmc
 from .models import GenerationQueryParams, SimulationQueryParams
 from src.analytics.distributions import calculate_posterior_log
 
@@ -53,16 +54,38 @@ async def run_generation(params: GenerationQueryParams = Depends()):
 
 @analytics_router.get('/simulate')
 async def run_simulation(sim_params: SimulationQueryParams = Depends()):
-    try:
-        generated_data = pd.read_csv(os.path.join(OUTPUT_DIR, "generated_data.csv"))
-    except FileNotFoundError as e:
-        return HTTPException(status_code=500, detail=str(e))
-    else:
-        res = await calculate_posterior_log(
-            generated_data,
-            sim_params.init_x_pos,
-            sim_params.init_y_pos,
-            sim_params.init_activity,
-            sim_params.init_bkg
-        )
-        return {"result": res}
+    if sim_params.is_generic:
+        try:
+            generated_data = pd.read_csv(os.path.join(OUTPUT_DIR, "generated_data.csv"))
+        except FileNotFoundError as e:
+            return HTTPException(status_code=500, detail=str(e))
+        else:
+            if sim_params.is_specified:
+                res = await run_mcmc(
+                    generated_data,
+                    simnum=sim_params.sim_number,
+                    burnin=sim_params.burn_in,
+                    init_params=(sim_params.init_x_pos, sim_params.init_y_pos, sim_params.init_activity, sim_params.init_bkg)
+                )
+
+                return {"result": res}
+            else:
+                res = await run_mcmc(
+                    generated_data,
+                    simnum=sim_params.sim_number,
+                    burnin=sim_params.burn_in
+                )
+
+                return {"result": res}
+
+
+        # res = await calculate_posterior_log(
+        #     generated_data,
+        #     sim_params.is_specified,
+        #     sim_params.is_generic,
+        #     sim_params.init_x_pos,
+        #     sim_params.init_y_pos,
+        #     sim_params.init_activity,
+        #     sim_params.init_bkg
+        # )
+        # return {"result": res}
