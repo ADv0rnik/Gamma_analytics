@@ -72,7 +72,7 @@ class PlotMaker:
             self.__set_ax_params(ax, title)
             ax.plot(x, y, lw=2, color="red")
 
-            plt.legend([self.legend], frameon=False, prop=LEGEND_PARAMS)
+            plt.legend(self.legend, frameon=False, prop=LEGEND_PARAMS)
             plt.savefig(self.output_file)
         if not dist_predefined and not normalized:
             title = f"Count Rate vs. Distance (Source to detector distance step: {STEP} m.)"
@@ -107,13 +107,17 @@ class PlotMaker:
         if self.legend is None:
             self.legend = ["Count rate"]
 
-        title = f"Poisson distribution for count rate (Speed: {kwargs['speed']} m per sec, Acquisition time: {kwargs['time']} sec)"
+        if not kwargs["speed"] and not kwargs["time"]:
+            title = "Poisson distribution for count rate"
+        else:
+            title = f"Poisson distribution for count rate (Speed: {kwargs['speed']} m per sec, Acquisition time: {kwargs['time']} sec)"
+
         filename = "poisson_plot.png"
         self.output_file = os.path.join(OUTPUT_DIR, filename)
         self.__set_ax_params(ax, title)
         ax.plot(x, y, lw=2, color="red")
 
-        plt.legend([self.legend], frameon=False, prop=LEGEND_PARAMS)
+        plt.legend(self.legend, frameon=False, prop=LEGEND_PARAMS)
         plt.savefig(self.output_file)
         plt.close(figure)
         return self.output_file

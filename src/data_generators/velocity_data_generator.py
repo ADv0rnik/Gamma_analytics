@@ -26,7 +26,7 @@ class VelocityDataGenerator(BaseDataGenerator):
         self.src_x = SRC_X,
         self.eff = EFFICIENCY
         self.speed = kwargs["speed"]
-        self.start_point = kwargs["start_point"]
+        self.start_point = kwargs["road_span"]
         self.span = kwargs["num_points"]
         self.time = kwargs["time"]
 
