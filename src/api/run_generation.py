@@ -29,7 +29,7 @@ async def run_data_generation(**kwargs) -> dict[str, Any]:
         df = await return_data_from_generator(default_data_generator)
 
         if kwargs["make_plot"]:
-            return await return_dataplot(df)
+            return await return_dataplot(df, speed=None, time=None)
         else:
             return {"data": df}
 

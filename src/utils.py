@@ -16,7 +16,8 @@ async def generate_coordinates(distance: int) -> Tuple[np.ndarray, np.ndarray]:
     :param distance: integer value representing the distance between the starting point and the destination.
     :return: tuple of arrays
     """
-    x_coordinates = np.arange(-distance, distance + 1, 1)
+    dist = abs(distance)
+    x_coordinates = np.arange(-dist, dist + 1, 1)
     y_coordinates = np.zeros(len(x_coordinates))
     return x_coordinates, y_coordinates
 
