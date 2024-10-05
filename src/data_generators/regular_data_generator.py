@@ -11,7 +11,7 @@ from src.config import (
     SRC_X,
     SRC_Y,
     EFFICIENCY,
-    BKG_ACTIVITY
+    BKG_COUNT_RATE
 )
 from src.utils import create_dataframe
 
@@ -21,7 +21,7 @@ class RegularDataGenerator(BaseDataGenerator):
         self.coordinates = kwargs["coordinates"]
         self.dist_predefined = IS_FIXED_DISTANCE
         self.activity = kwargs["activity"]
-        self.background = BKG_ACTIVITY,
+        self.background = BKG_COUNT_RATE,
         self.src_x = SRC_X,
         self.src_y = SRC_Y,
         self.eff = EFFICIENCY
@@ -29,7 +29,7 @@ class RegularDataGenerator(BaseDataGenerator):
     async def __get_dist_arrays(self):
         jobs = []
         for probe in src_y_probe.values():
-            jobs.append(asyncio.create_task(self.__generate_count_rate(
+            jobs.append(asyncio.create_task(self.generate_count_rate(
                 self.coordinates[0],
                 self.coordinates[1],
                 src_y=probe,
@@ -40,7 +40,7 @@ class RegularDataGenerator(BaseDataGenerator):
     async def generate_data(self):
         data_dict = {'x': self.coordinates[0], 'y': self.coordinates[1]}
         if self.dist_predefined:
-            gen_data = await self.__generate_count_rate(
+            gen_data = await self.generate_count_rate(
                 self.coordinates[0],
                 self.coordinates[1],
                 self.activity
@@ -66,7 +66,7 @@ class RegularDataGenerator(BaseDataGenerator):
             pois_data[i] = np.random.poisson(generated_data[i], 1)[0]
         return pois_data
 
-    async def __generate_count_rate(
+    async def generate_count_rate(
             self,
             x_position,
             y_position,
