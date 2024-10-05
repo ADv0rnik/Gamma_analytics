@@ -1,10 +1,12 @@
 import os
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 import zipfile
 
 from typing import Tuple
-from src.config import SRC_Y, SRC_X, OUTPUT_DIR
+from geopandas import GeoDataFrame
+from src.config import SRC_Y, SRC_X, OUTPUT_DIR, EFFICIENCY, SCALE, BRANCH_RATIO, mu_air
 
 
 async def generate_coordinates(distance: int) -> Tuple[np.ndarray, np.ndarray]:
@@ -77,3 +79,21 @@ async def make_normalization(data_to_normalize: pd.DataFrame):
     return pd.concat([data_to_normalize, norm_data], axis=1)
 
 
+async def make_points_grid(geodata_array: np.ndarray) -> GeoDataFrame:
+    points_gdf = gpd.GeoDataFrame(geometry=gpd.points_from_xy(geodata_array[:, 0], geodata_array[:, 1]))
+    points_gdf.to_file(os.path.join(OUTPUT_DIR, 'source_points.geojson'), driver='GeoJSON')
+    return points_gdf
+
+
+def mean_count_rate(
+        x_position,
+        y_position,
+        src_x,
+        src_y,
+        activity,
+        bkg,
+        det_eff=EFFICIENCY,
+):
+    dist = np.sqrt((x_position - src_x) ** 2 + (y_position - src_y) ** 2)
+    count_rate = (activity * SCALE * BRANCH_RATIO * det_eff * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
+    return np.round(count_rate, 2) + bkg

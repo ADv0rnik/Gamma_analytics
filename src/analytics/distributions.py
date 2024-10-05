@@ -3,10 +3,10 @@ import pandas as pd
 
 from scipy.stats import gamma, norm, poisson
 from src.config import SCALE, BKG_COUNT_RATE
-from src.data_generators.regular_data_generator import RegularDataGenerator
+from src.utils import mean_count_rate
 
 
-async def calculate_prior_log(act, mu_bkg):
+async def calculate_prior_log(act, mu_bkg) -> float:
     if min(act, mu_bkg) < 0:
         return -np.inf
 
@@ -17,26 +17,26 @@ async def calculate_prior_log(act, mu_bkg):
 
     return log_prior
 
-async def calculate_likelihood_log(lambda_params: tuple, data: pd.DataFrame):
+async def calculate_likelihood_log(lambda_params: np.ndarray, data: pd.DataFrame) -> float:
     x, y, act, mu_bkg = lambda_params
+
     if min(act, mu_bkg) < 0:
         return -np.inf
 
-    data_generator = RegularDataGenerator(
-        coordinates = (data["x"], data["y"]),
-        dist_predefined = True,
-        activity = act,
-        background = mu_bkg,
-        src_x = x,
-        src_y = y
-    )
+    if np.sqrt(x ** 2 + y ** 2) > 2000:
+        return -np.inf
 
-    mean_count_rate = await data_generator.generate_data()
-    likelihood_log = np.sum(poisson.logpmf(data["pois_data"], mu=mean_count_rate["generic_count_rate"]))
+    count_rate = mean_count_rate(data["x"], data["y"], x, y, act, mu_bkg)
+
+    distro = poisson.pmf(data['pois_data'], mu=count_rate)
+    distro = np.nan_to_num(distro)
+    likelihood_log = np.sum(np.log(np.maximum(distro, 1e-323)))
+
     return likelihood_log
 
 
-async def calculate_posterior_log(data: pd.DataFrame, x, y, activity, bkg_cps):
-    prior = await calculate_prior_log(act=activity, mu_bkg=bkg_cps)
-    likelihood = await calculate_likelihood_log(data=data, x=x, y=y, act=activity, mu_bkg=bkg_cps)
+async def calculate_posterior_log(data: pd.DataFrame, lambda_params: np.ndarray) -> float:
+    activity = lambda_params[2]
+    prior = await calculate_prior_log(act=activity, mu_bkg=BKG_COUNT_RATE)
+    likelihood = await calculate_likelihood_log(lambda_params, data=data)
     return  prior + likelihood

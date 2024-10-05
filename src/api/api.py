@@ -8,7 +8,7 @@ from src.utils import zip_files, generate_coordinates
 from src.api.run_generation import run_data_generation
 from src.api.run_simulation import run_mcmc
 from .models import GenerationQueryParams, SimulationQueryParams
-from src.analytics.distributions import calculate_posterior_log
+
 
 analytics_router = APIRouter(tags=["analytics"])
 
@@ -64,28 +64,23 @@ async def run_simulation(sim_params: SimulationQueryParams = Depends()):
                 res = await run_mcmc(
                     generated_data,
                     simnum=sim_params.sim_number,
-                    burnin=sim_params.burn_in,
+                    burn_in=sim_params.burn_in,
                     init_params=(sim_params.init_x_pos, sim_params.init_y_pos, sim_params.init_activity, sim_params.init_bkg)
                 )
 
                 return {"result": res}
             else:
-                res = await run_mcmc(
-                    generated_data,
-                    simnum=sim_params.sim_number,
-                    burnin=sim_params.burn_in
-                )
+                try:
+                    res = await run_mcmc(
+                        generated_data,
+                        simnum=sim_params.sim_number,
+                        burn_in=sim_params.burn_in
+                    )
+                    result_files = list(res.values())
+                    zip_file = zip_files(result_files)
+                except KeyError as e:
+                    return HTTPException(status_code=500, detail=str(e))
+                else:
+                    return FileResponse(path=zip_file, filename=os.path.basename(zip_file),
+                                        media_type="application/zip")
 
-                return {"result": res}
-
-
-        # res = await calculate_posterior_log(
-        #     generated_data,
-        #     sim_params.is_specified,
-        #     sim_params.is_generic,
-        #     sim_params.init_x_pos,
-        #     sim_params.init_y_pos,
-        #     sim_params.init_activity,
-        #     sim_params.init_bkg
-        # )
-        # return {"result": res}

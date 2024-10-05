@@ -29,7 +29,7 @@ class RegularDataGenerator(BaseDataGenerator):
     async def __get_dist_arrays(self):
         jobs = []
         for probe in src_y_probe.values():
-            jobs.append(asyncio.create_task(self.__generate_count_rate(
+            jobs.append(asyncio.create_task(self.generate_count_rate(
                 self.coordinates[0],
                 self.coordinates[1],
                 src_y=probe,
@@ -40,7 +40,7 @@ class RegularDataGenerator(BaseDataGenerator):
     async def generate_data(self):
         data_dict = {'x': self.coordinates[0], 'y': self.coordinates[1]}
         if self.dist_predefined:
-            gen_data = await self.__generate_count_rate(
+            gen_data = await self.generate_count_rate(
                 self.coordinates[0],
                 self.coordinates[1],
                 self.activity
@@ -66,7 +66,7 @@ class RegularDataGenerator(BaseDataGenerator):
             pois_data[i] = np.random.poisson(generated_data[i], 1)[0]
         return pois_data
 
-    async def __generate_count_rate(
+    async def generate_count_rate(
             self,
             x_position,
             y_position,

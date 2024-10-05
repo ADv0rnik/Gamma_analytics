@@ -3,22 +3,28 @@ import pandas as pd
 
 from time import time
 from typing import Tuple
-from scipy.stats import multivariate_normal, uniform
+from scipy.stats import uniform
 
 from src.analytics.distributions import calculate_posterior_log
-
-
-SIGMA_MH = 0.01
-BETA_SIGMA = 1e-4
+from src.presentation.plot_maker import PlotMaker
+from src.utils import make_points_grid
 
 
 async def run_mcmc(
         dataframe: pd.DataFrame,
         simnum: int,
-        burnin: int,
+        burn_in: int,
         init_params: Tuple[float, float, float, float] | None = None,
 ):
     mcmc_data = await get_data_from_mcmc(dataframe=dataframe, simnum=simnum, init_params=init_params)
+    mcmc_data_burn = mcmc_data[burn_in:, :]
+    points_ = await make_points_grid(mcmc_data_burn)
+    plot_maker = PlotMaker(data=dataframe, legend=["Measurement Points", "CPS"])
+    mcmc_plot = plot_maker.plot_mcmc_sequence(burnin_data=mcmc_data_burn)
+
+    return {
+        "mcmc_plot": mcmc_plot,
+    }
 
 
 async def get_data_from_mcmc(
@@ -26,10 +32,12 @@ async def get_data_from_mcmc(
         simnum: int,
         init_params: Tuple[float, float, float, float] | None = None,
 ):
+    sigma_mh = 0.01
+    beta_sigma = 1e-4
     sigma = np.diag(np.ones(4) * 1000 ** 2)
     estimated_mean = np.zeros(4)
     estimated_sigma = np.zeros((4, 4))
-    lambda_vec = np.zeros((simnum, 4))
+    lambda_vector = np.zeros((simnum, 4))
     lambda_start_vector = np.zeros((simnum, 4))
     accept = 0
     count = 0
@@ -46,7 +54,7 @@ async def get_data_from_mcmc(
     for i in range(1, simnum + 1):
         count += 1
         lambda_start = lambda_.copy()
-        covariance = SIGMA_MH ** 2 * sigma
+        covariance = sigma_mh ** 2 * sigma
         lambda_start[:4] = np.random.multivariate_normal(mean=lambda_[:4], cov=covariance, size=1)
 
         if i % 1000 == 0:
@@ -60,3 +68,37 @@ async def get_data_from_mcmc(
         lambda_start_vector[i - 1, :] = lambda_start
 
         random_uniforms = uniform.rvs()
+        p1 = await calculate_posterior_log(data=dataframe, lambda_params=lambda_start)
+        p2 = await calculate_posterior_log(data=dataframe, lambda_params=lambda_)
+        posterior = np.exp(p1 - p2)
+        accept_prob = np.min([1, posterior])
+
+        if random_uniforms < accept_prob:
+            lambda_ = lambda_start.copy()
+            accept += 1
+
+        lambda_vector[i - 1, :] = lambda_.copy()
+
+        w = 1 / i
+        estimated_mean = (1 - w) * estimated_mean + w * lambda_[:4]
+        estimated_sigma = (1 - w) * estimated_sigma + w * np.outer(lambda_[:4] - estimated_mean, lambda_[:4] - estimated_mean)
+
+        if i > 100:
+            sigma = np.diag(np.diag(estimated_sigma)) + np.eye(len(estimated_mean)) * beta_sigma
+
+        if i % 100 == 0:
+            if accept / count < 0.24:
+                sigma_mh = max(0.95, (1 - 5 / np.sqrt(i))) * sigma_mh
+            else:
+                sigma_mh = min(1.05, 1 + 5 / np.sqrt(i)) * sigma_mh
+            accept = 0
+            count = 0
+
+        if i % 1000 == 0:
+            time_segment_end = time()
+            time_difference = time_segment_end - time_segment_start
+            time_left = (simnum - i) / 1000
+            print(f"{100 * round(i / simnum, 2):.2f}% done. Segment duration: {time_difference:.2f} seconds. ETA in: {time_left * time_difference:.2f} seconds or {time_left * time_difference / 60:.2f} minutes.")
+            time_segment_start = time()
+
+    return lambda_vector
