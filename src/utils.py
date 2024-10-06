@@ -1,10 +1,28 @@
+import os
 import numpy as np
 import pandas as pd
+import geopandas as gpd
+import zipfile
 
-from src.config import SRC_Y, SRC_X, x_coord, y_coord
+from typing import Tuple
+from geopandas import GeoDataFrame
+from src.config import SRC_Y, SRC_X, OUTPUT_DIR, EFFICIENCY, SCALE, BRANCH_RATIO, mu_air
 
 
-def calculate_angles(
+async def generate_coordinates(distance: int) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    The function defines the distance range (part of the road near the source)
+    Acquisition time is 1s.
+    :param distance: integer value representing the distance between the starting point and the destination.
+    :return: tuple of arrays
+    """
+    dist = abs(distance)
+    x_coordinates = np.arange(-dist, dist + 1, 1)
+    y_coordinates = np.zeros(len(x_coordinates))
+    return x_coordinates, y_coordinates
+
+
+async def calculate_angles(
         x_position: np.ndarray,
         y_position: np.ndarray,
         src_x=SRC_X,
@@ -41,3 +59,42 @@ def calculate_angles(
 
 async def create_dataframe(data: dict) -> pd.DataFrame:
     return pd.DataFrame(data)
+
+
+def zip_files(files: list[str]):
+    basename, _ = os.path.splitext(files[0])
+    zip_filename = f"{basename}.zip"
+    print(f"Creating {zip_filename}")
+
+    with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zip_f:
+        for f in files:
+            zip_f.write(filename=f, arcname=os.path.basename(f))
+    return zip_filename
+
+
+async def make_normalization(data_to_normalize: pd.DataFrame):
+    only_gen_data = data_to_normalize.iloc[:, 2::1]
+    norm_data = only_gen_data.apply(lambda x: x / x.max(), axis=0)
+    for i, column in enumerate(norm_data.columns):
+        norm_data.rename(columns={column: column + "_n"}, inplace=True)
+    return pd.concat([data_to_normalize, norm_data], axis=1)
+
+
+async def make_points_grid(geodata_array: np.ndarray) -> GeoDataFrame:
+    points_gdf = gpd.GeoDataFrame(geometry=gpd.points_from_xy(geodata_array[:, 0], geodata_array[:, 1]))
+    points_gdf.to_file(os.path.join(OUTPUT_DIR, 'source_points.geojson'), driver='GeoJSON')
+    return points_gdf
+
+
+def mean_count_rate(
+        x_position,
+        y_position,
+        src_x,
+        src_y,
+        activity,
+        bkg,
+        det_eff=EFFICIENCY,
+):
+    dist = np.sqrt((x_position - src_x) ** 2 + (y_position - src_y) ** 2)
+    count_rate = (activity * SCALE * BRANCH_RATIO * det_eff * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
+    return np.round(count_rate, 2) + bkg
