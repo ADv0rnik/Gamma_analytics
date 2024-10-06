@@ -82,6 +82,9 @@ async def run_simulation(sim_params: SimulationQueryParams = Depends()):
                 except KeyError as e:
                     return HTTPException(status_code=500, detail=str(e))
                 else:
-                    return FileResponse(path=zip_file, filename=os.path.basename(zip_file),
-                                        media_type="application/zip")
+                    return FileResponse(
+                        path=zip_file,
+                        filename=os.path.basename(zip_file),
+                        media_type="application/zip"
+                    )
 

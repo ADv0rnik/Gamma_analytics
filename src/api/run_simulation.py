@@ -19,11 +19,13 @@ async def run_mcmc(
     mcmc_data = await get_data_from_mcmc(dataframe=dataframe, simnum=simnum, init_params=init_params)
     mcmc_data_burn = mcmc_data[burn_in:, :]
     points_ = await make_points_grid(mcmc_data_burn)
-    plot_maker = PlotMaker(data=dataframe, legend=["Measurement Points", "CPS"])
+    plot_maker = PlotMaker(data=dataframe)
     mcmc_plot = plot_maker.plot_mcmc_sequence(burnin_data=mcmc_data_burn)
+    mcmc_posterior_act_plot = plot_maker.plot_activity_density(burnin_data=mcmc_data_burn)
 
     return {
         "mcmc_plot": mcmc_plot,
+        "act_density": mcmc_posterior_act_plot,
     }
 
 
@@ -45,9 +47,9 @@ async def get_data_from_mcmc(
 
     if init_params:
         lambda_ = np.array([*init_params])
-
-    df_index = np.argmax(dataframe.iloc[:, 2])
-    lambda_ = np.array([dataframe.iloc[df_index, 0], dataframe.iloc[df_index, 1], 100, np.mean(dataframe.iloc[:, 2])])
+    else:
+        df_index = np.argmax(dataframe.iloc[:, 2])
+        lambda_ = np.array([dataframe.iloc[df_index, 0], dataframe.iloc[df_index, 1], 100, np.mean(dataframe.iloc[:, 2])])
 
     print(f"Data reconstruction in progress...")
 
