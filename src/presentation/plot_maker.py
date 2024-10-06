@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import seaborn as sns
 
 from matplotlib import pyplot as plt
 from dataclasses import dataclass
@@ -40,7 +41,6 @@ LEGEND = True
 class PlotMaker:
     data: pd.DataFrame | pd.Series
     output_file: str = None
-    legend: list = None
 
     def plot_count_rate(self, **kwargs) -> str:
         figure, ax = plt.subplots(figsize=(16, 6))
@@ -49,8 +49,7 @@ class PlotMaker:
         normalized = kwargs["normalized"]
         columns = [column for column in self.data.columns if column.startswith('generic') and not column.endswith('n')]
         columns_norm = [column for column in self.data.columns if column.startswith('generic') and column.endswith('n')]
-        if self.legend is None:
-            self.legend = ["Count rate"]
+        legend = ["Count rate"]
 
         if dist_predefined and not normalized:
             title = f"Count rate with predefined distance of {SRC_Y} meters"
@@ -61,7 +60,7 @@ class PlotMaker:
             self.__set_ax_params(ax, title)
             ax.plot(x, y, lw=2, color="red")
 
-            plt.legend([self.legend], frameon=False, prop=LEGEND_PARAMS)
+            plt.legend(legend, frameon=False, prop=LEGEND_PARAMS)
             plt.savefig(self.output_file)
         if dist_predefined and normalized:
             title = f"Count rate with predefined distance of {SRC_Y} meters (Normalized)"
@@ -72,7 +71,7 @@ class PlotMaker:
             self.__set_ax_params(ax, title)
             ax.plot(x, y, lw=2, color="red")
 
-            plt.legend(self.legend, frameon=False, prop=LEGEND_PARAMS)
+            plt.legend(legend, frameon=False, prop=LEGEND_PARAMS)
             plt.savefig(self.output_file)
         if not dist_predefined and not normalized:
             title = f"Count Rate vs. Distance (Source to detector distance step: {STEP} m.)"
@@ -104,8 +103,7 @@ class PlotMaker:
         figure, ax = plt.subplots(figsize=(16, 6))
         x = self.data["x"]
         y = self.data["pois_data"]
-        if self.legend is None:
-            self.legend = ["Count rate"]
+        legend = ["Count rate"]
 
         if not kwargs["speed"] and not kwargs["time"]:
             title = "Poisson distribution for count rate"
@@ -117,16 +115,14 @@ class PlotMaker:
         self.__set_ax_params(ax, title)
         ax.plot(x, y, lw=2, color="red")
 
-        plt.legend(self.legend, frameon=False, prop=LEGEND_PARAMS)
+        plt.legend(legend, frameon=False, prop=LEGEND_PARAMS)
         plt.savefig(self.output_file)
         plt.close(figure)
         return self.output_file
 
     def plot_mcmc_sequence(self, **kwargs) -> str:
-        if self.legend is None:
-            self.legend = ["Count rate"]
-
         figure, ax = plt.subplots(figsize=(10, 6))
+        legend = ["Measurement Points", "CPS"]
         title = "Fit of the peak in measurement time-series"
         filename = "mcmc_sequence_plot.png"
         ax.scatter(self.data.index, self.data['pois_data'], label='Measurement data', alpha=0.5)
@@ -151,7 +147,31 @@ class PlotMaker:
             )
             ax.plot(green_line, linewidth=2, color=(0, 1, 0, 0.2))
 
-        plt.legend(self.legend, frameon=False, prop=LEGEND_PARAMS)
+        plt.legend(legend, frameon=False, prop=LEGEND_PARAMS)
+        plt.savefig(self.output_file)
+        plt.close(figure)
+        return self.output_file
+
+    def plot_activity_density(self, **kwargs) -> str:
+        figure, ax = plt.subplots(figsize=(10, 6))
+        legend = ["Activity density", "Source activity"]
+        title = "Posterior distribution of source activity"
+        filename = "mcmc_activity_density.png"
+
+        if kwargs:
+            res_burnin = kwargs["burnin_data"]
+        else:
+            raise KeyError
+
+        sns.kdeplot(res_burnin[:, 2], fill=True, color="b")
+        self.output_file = os.path.join(OUTPUT_DIR, filename)
+
+        self.__set_ax_params(ax, title, labels={
+            "x": "Estimated activity, MBq",
+            "y": "Density",
+        })
+        plt.axvline(100, color='r', ls='--')
+        plt.legend(legend, frameon=False, prop=LEGEND_PARAMS)
         plt.savefig(self.output_file)
         plt.close(figure)
         return self.output_file
