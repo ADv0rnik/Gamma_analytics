@@ -3,7 +3,7 @@ import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 
-from src.config import OUTPUT_DIR
+from src.config import OUTPUT_DIR, CACHE
 from src.utils import zip_files, generate_coordinates
 from src.api.run_generation import run_data_generation
 from src.api.run_simulation import run_mcmc
@@ -17,6 +17,7 @@ analytics_router = APIRouter(tags=["analytics"])
 async def run_generation(params: GenerationQueryParams = Depends()):
     csv_filename = os.path.join(OUTPUT_DIR, "generated_data.csv")
     x_coord, y_coord = await generate_coordinates(distance=params.dist)
+    CACHE["activity"] = params.act
     try:
         if params.make_plot:
             result = await run_data_generation(

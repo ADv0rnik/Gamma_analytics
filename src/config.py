@@ -11,6 +11,9 @@ from src.tools.interpolators import AttenuationInterpolator
 BASE_DIR = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = os.path.join(BASE_DIR, 'outputs')
 ENV_PATH = os.path.join(BASE_DIR, '.env')
+CACHE = {
+    "activity": 100
+}
 
 ATTENUATION_FILE = os.path.join(BASE_DIR, "nuclib", "attenuation_table.csv")
 EFF_FILE = os.path.join(BASE_DIR, "nuclib", "relative_efficiency_HPGe.csv")
