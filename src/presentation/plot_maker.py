@@ -5,8 +5,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from dataclasses import dataclass
 from src.utils import mean_count_rate
-from src.config import OUTPUT_DIR, STEP, SRC_Y
-
+from src.config import OUTPUT_DIR, STEP, SRC_Y, CACHE
 
 GRID_PARAMS = {
     "linestyle":'-',
@@ -122,7 +121,7 @@ class PlotMaker:
 
     def plot_mcmc_sequence(self, **kwargs) -> str:
         figure, ax = plt.subplots(figsize=(10, 6))
-        legend = ["Measurement Points", "CPS"]
+        legend = ["Measurement Points", "MC simulated CPS"]
         title = "Fit of the peak in measurement time-series"
         filename = "mcmc_sequence_plot.png"
         ax.scatter(self.data.index, self.data['pois_data'], label='Measurement data', alpha=0.5)
@@ -170,8 +169,38 @@ class PlotMaker:
             "x": "Estimated activity, MBq",
             "y": "Density",
         })
-        plt.axvline(100, color='r', ls='--')
+        plt.axvline(CACHE.get("activity"), color='r', ls='--')
         plt.legend(legend, frameon=False, prop=LEGEND_PARAMS)
+        plt.savefig(self.output_file)
+        plt.close(figure)
+        return self.output_file
+
+    def plot_points(self, **kwargs) -> str:
+        figure, ax = plt.subplots(figsize=(10, 8))
+        title = "Posterior distribution for source position"
+        filename = "mcmc_points.png"
+
+        if kwargs:
+            points = kwargs["points"]
+        else:
+            raise KeyError
+
+        x = points.geometry.x
+        y = points.geometry.y
+        points_df = pd.DataFrame(zip(x, y), columns=['x', 'y'])
+
+        x_lim = points_df["x"].min(), points_df["x"].max()
+        y_lim = points_df["y"].min(), points_df["y"].max()
+
+        hb = ax.hexbin(x, y, gridsize=35, bins='log', cmap='magma')
+        cb = figure.colorbar(hb, ax=ax, label='Counts')
+
+        self.output_file = os.path.join(OUTPUT_DIR, filename)
+        self.__set_ax_params(ax, title, labels={
+            "x": "x coordinate (m)",
+            "y": "y coordinate (m)",
+        })
+        plt.axhline(y=0, color='k', linestyle='-')
         plt.savefig(self.output_file)
         plt.close(figure)
         return self.output_file

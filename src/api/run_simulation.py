@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pandas as pd
 
@@ -22,10 +24,12 @@ async def run_mcmc(
     plot_maker = PlotMaker(data=dataframe)
     mcmc_plot = plot_maker.plot_mcmc_sequence(burnin_data=mcmc_data_burn)
     mcmc_posterior_act_plot = plot_maker.plot_activity_density(burnin_data=mcmc_data_burn)
+    mcmc_points_density = plot_maker.plot_points(points=points_)
 
     return {
         "mcmc_plot": mcmc_plot,
         "act_density": mcmc_posterior_act_plot,
+        "plot_density": mcmc_points_density,
     }
 
 
@@ -34,6 +38,8 @@ async def get_data_from_mcmc(
         simnum: int,
         init_params: Tuple[float, float, float, float] | None = None,
 ):
+    warnings.filterwarnings('ignore')
+
     sigma_mh = 0.01
     beta_sigma = 1e-4
     sigma = np.diag(np.ones(4) * 1000 ** 2)
