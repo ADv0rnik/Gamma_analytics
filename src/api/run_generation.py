@@ -15,8 +15,18 @@ from src.utils import make_normalization
 
 
 async def run_data_generation(**kwargs) -> dict[str, Any]:
+    if kwargs["include_angles"] and kwargs["add_speed"]:
+        pass
+
     if kwargs["include_angles"]:
         default_data_generator = AngularDataGenerator(**kwargs)
+        df = await return_data_from_generator(default_data_generator)
+
+        if kwargs["make_plot"]:
+            return await return_dataplot(df, speed=None, time=None)
+        else:
+            return {"data": df}
+
     if kwargs["add_speed"]:
         velocity_data_generator = VelocityDataGenerator(**kwargs)
         df = await return_data_from_generator(velocity_data_generator)
@@ -24,6 +34,7 @@ async def run_data_generation(**kwargs) -> dict[str, Any]:
             return await return_dataplot(df, speed=kwargs["speed"], time=kwargs["time"])
         else:
             return {"data": df}
+
     else:
         default_data_generator = RegularDataGenerator(**kwargs)
         df = await return_data_from_generator(default_data_generator)
