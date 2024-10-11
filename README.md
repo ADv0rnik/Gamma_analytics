@@ -28,7 +28,7 @@ For Windows OS:
 python virtualenv venv
 venv/Scripts/activate
 ```
-3. Run installation of dependencies `pip install -r requirements.txt` 
+3. Install dependencies `pip install -r requirements.txt` 
 4. Create a `.env` file to store project configurations. Refer to `.env_example` for more information on available variables. Set the following values:
 - PROJECT_HOST=127.0.0.1
 - PROJECT_PORT=8000
