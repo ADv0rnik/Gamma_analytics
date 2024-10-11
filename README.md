@@ -3,7 +3,7 @@
 
 ### Gamma Analytics
 
-A web application for simulate gamma source localization using bayessian inference and Monte Carlo simulations.  
+A web application for simulating gamma source localization using Bayesian inference and Monte Carlo simulations
 
 #### Usage
 
