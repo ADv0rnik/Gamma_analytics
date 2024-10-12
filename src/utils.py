@@ -3,10 +3,14 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import zipfile
+import logging
 
 from typing import Tuple
 from geopandas import GeoDataFrame
 from src.config import SRC_Y, SRC_X, OUTPUT_DIR, EFFICIENCY, SCALE, BRANCH_RATIO, mu_air
+
+
+logger = logging.getLogger("gamma")
 
 
 async def generate_coordinates(distance: int) -> Tuple[np.ndarray, np.ndarray]:
@@ -64,7 +68,7 @@ async def create_dataframe(data: dict) -> pd.DataFrame:
 def zip_files(files: list[str]):
     basename, _ = os.path.splitext(files[0])
     zip_filename = f"{basename}.zip"
-    print(f"Creating {zip_filename}")
+    logger.info(f"Creating {zip_filename}")
 
     with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zip_f:
         for f in files:
