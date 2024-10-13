@@ -2,6 +2,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
+import logging
 
 from time import time
 from typing import Tuple
@@ -12,25 +13,32 @@ from src.presentation.plot_maker import PlotMaker
 from src.utils import make_points_grid
 
 
+logger = logging.getLogger("gamma")
+
+
 async def run_mcmc(
         dataframe: pd.DataFrame,
         simnum: int,
         burn_in: int,
         init_params: Tuple[float, float, float, float] | None = None,
 ):
-    mcmc_data = await get_data_from_mcmc(dataframe=dataframe, simnum=simnum, init_params=init_params)
-    mcmc_data_burn = mcmc_data[burn_in:, :]
-    points_ = await make_points_grid(mcmc_data_burn)
-    plot_maker = PlotMaker(data=dataframe)
-    mcmc_plot = plot_maker.plot_mcmc_sequence(burnin_data=mcmc_data_burn)
-    mcmc_posterior_act_plot = plot_maker.plot_activity_density(burnin_data=mcmc_data_burn)
-    mcmc_points_density = plot_maker.plot_points(points=points_)
-
-    return {
-        "mcmc_plot": mcmc_plot,
-        "act_density": mcmc_posterior_act_plot,
-        "plot_density": mcmc_points_density,
-    }
+    try:
+        mcmc_data = await get_data_from_mcmc(dataframe=dataframe, simnum=simnum, init_params=init_params)
+        mcmc_data_burn = mcmc_data[burn_in:, :]
+        points_ = await make_points_grid(mcmc_data_burn)
+        plot_maker = PlotMaker(data=dataframe)
+        mcmc_plot = plot_maker.plot_mcmc_sequence(burnin_data=mcmc_data_burn)
+        mcmc_posterior_act_plot = plot_maker.plot_activity_density(burnin_data=mcmc_data_burn)
+        mcmc_points_density = plot_maker.plot_points(points=points_)
+    except Exception as err:
+        logger.error(f"Error while running simulation: {err}")
+    else:
+        logger.info("Reconstruction complete")
+        return {
+            "mcmc_plot": mcmc_plot,
+            "act_density": mcmc_posterior_act_plot,
+            "plot_density": mcmc_points_density,
+        }
 
 
 async def get_data_from_mcmc(
@@ -57,7 +65,7 @@ async def get_data_from_mcmc(
         df_index = np.argmax(dataframe.iloc[:, 2])
         lambda_ = np.array([dataframe.iloc[df_index, 0], dataframe.iloc[df_index, 1], 100, np.mean(dataframe.iloc[:, 2])])
 
-    print(f"Data reconstruction in progress...")
+    logger.info("Data reconstruction in progress...")
 
     for i in range(1, simnum + 1):
         count += 1
