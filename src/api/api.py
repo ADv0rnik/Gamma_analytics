@@ -65,6 +65,7 @@ async def run_simulation(sim_params: SimulationQueryParams = Depends()):
         try:
             generated_data = pd.read_csv(os.path.join(OUTPUT_DIR, "generated_data.csv"))
         except FileNotFoundError as e:
+            logger.error(f"Error while handling request {e}")
             return HTTPException(status_code=500, detail=str(e))
         else:
             if sim_params.is_specified:
@@ -86,6 +87,7 @@ async def run_simulation(sim_params: SimulationQueryParams = Depends()):
                     result_files = list(res.values())
                     zip_file = zip_files(result_files)
                 except KeyError as e:
+                    logger.error(f"Error while handling request {e}")
                     return HTTPException(status_code=500, detail=str(e))
                 else:
                     return FileResponse(

@@ -1,4 +1,5 @@
 import pandas as pd
+import logging
 
 from typing import Any
 from src.data_generators.angular_data_generator import AngularDataGenerator
@@ -13,6 +14,8 @@ from src.config import (
 )
 from src.utils import make_normalization
 
+logger = logging.getLogger("gamma")
+
 
 async def run_data_generation(**kwargs) -> dict[str, Any]:
     if kwargs["include_angles"] and kwargs["add_speed"]:
@@ -20,6 +23,8 @@ async def run_data_generation(**kwargs) -> dict[str, Any]:
 
     if kwargs["include_angles"]:
         default_data_generator = AngularDataGenerator(**kwargs)
+        logger.info(f"{default_data_generator.__class__.__name__} is ready to generate data")
+
         df = await return_data_from_generator(default_data_generator)
 
         if kwargs["make_plot"]:
@@ -28,8 +33,10 @@ async def run_data_generation(**kwargs) -> dict[str, Any]:
             return {"data": df}
 
     if kwargs["add_speed"]:
-        velocity_data_generator = VelocityDataGenerator(**kwargs)
-        df = await return_data_from_generator(velocity_data_generator)
+        default_data_generator = VelocityDataGenerator(**kwargs)
+        logger.info(f"{default_data_generator.__class__.__name__} is ready to generate data")
+
+        df = await return_data_from_generator(default_data_generator)
         if kwargs["make_plot"]:
             return await return_dataplot(df, speed=kwargs["speed"], time=kwargs["time"])
         else:
@@ -37,6 +44,8 @@ async def run_data_generation(**kwargs) -> dict[str, Any]:
 
     else:
         default_data_generator = RegularDataGenerator(**kwargs)
+        logger.info(f"{default_data_generator.__class__.__name__} is ready to generate data")
+
         df = await return_data_from_generator(default_data_generator)
 
         if kwargs["make_plot"]:
