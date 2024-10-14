@@ -29,7 +29,7 @@ python virtualenv venv
 venv/Scripts/activate
 ```
 3. Install dependencies `pip install -r requirements.txt` 
-4. Create a `.env` file to store project configurations. Refer to `.env_example` for more information on available variables. Set the following values:
+4. Create a `.env` file to store project configurations. Refer to `.env_example` for more information on available variables. Set the following values in order to run Gamma analytics on local machine:
 - PROJECT_HOST=127.0.0.1
 - PROJECT_PORT=8000
 5. Once the environment settings are defined, run the following command: `python main.py`
