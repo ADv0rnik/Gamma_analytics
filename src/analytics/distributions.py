@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from scipy.stats import gamma, norm, poisson
-from src.config import SCALE, BKG_COUNT_RATE
+from src.settings.config import SCALE, BKG_COUNT_RATE
 from src.utils import mean_count_rate
 
 

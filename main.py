@@ -2,8 +2,8 @@ import uvicorn
 import logging.config
 from fastapi import FastAPI
 
-from src.config import ApiSettings
-from src.config import LOGGING_CONFIG
+from src.settings.config import ApiSettings
+from src.settings.config import LOGGING_CONFIG
 from src.api.api import analytics_router
 
 
@@ -28,7 +28,7 @@ app = start_application(settings)
 app.include_router(analytics_router, prefix=settings.API_V1_STR)
 
 if __name__ == "__main__":
-    logger.info("Starting uvicorn server...")
+    logger.info(f"Starting uvicorn server on {settings.PROJECT_HOST}:{settings.PROJECT_PORT}")
     uvicorn.run(
         "main:app",
         host=settings.PROJECT_HOST,

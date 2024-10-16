@@ -2,7 +2,7 @@ import asyncio
 import numpy as np
 
 from src.data_generators.base_data_generator import BaseDataGenerator
-from src.config import (
+from src.settings.config import (
     SCALE,
     BRANCH_RATIO,
     IS_FIXED_DISTANCE,

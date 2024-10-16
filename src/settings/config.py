@@ -5,10 +5,11 @@ from pydantic_settings import BaseSettings
 from nuclib.nuclides import Energy, BranchingRatio
 from src.tools.data_formatter import formatter
 from src.tools.interpolators import AttenuationInterpolator
+from .logger_settings import ColoredJSONFormatter
 
 
 # common params
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
 WORK_DIR = os.path.join(BASE_DIR, "temp")
 
@@ -76,21 +77,22 @@ LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "standard": {
-            "format": "%(levelname)-7s %(asctime)s %(message)s"
+        "json": {
+            "()": ColoredJSONFormatter,
+            "format": "  %(log_color)s%(levelname)-8s%(reset)s | %(asctime)s - %(name)s - %(levelname)s - %(message)s"
         }
     },
     "handlers": {
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
-            "formatter": "standard"
+            "formatter": "json"
         },
         "file": {
             "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(BASE_DIR, 'logs', 'analytics.log'),
-            "formatter": "standard",
+            "formatter": "json",
             "encoding": "UTF-8",
             "maxBytes": 10 * 1024 * 1024,
             "backupCount": 1000
