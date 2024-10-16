@@ -26,9 +26,9 @@ async def calculate_likelihood_log(lambda_params: np.ndarray, data: pd.DataFrame
     if np.sqrt(x ** 2 + y ** 2) > 2000:
         return -np.inf
 
-    count_rate = mean_count_rate(data["x"], data["y"], x, y, act, mu_bkg)
+    count_rate = mean_count_rate(data.iloc[:, 0], data.iloc[:, 1], x, y, act, mu_bkg)
 
-    distro = poisson.pmf(data['pois_data'], mu=count_rate)
+    distro = poisson.pmf(data.iloc[:, 2], mu=count_rate)
     distro = np.nan_to_num(distro)
     likelihood_log = np.sum(np.log(np.maximum(distro, 1e-323)))
 

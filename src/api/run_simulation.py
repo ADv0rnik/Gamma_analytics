@@ -1,3 +1,4 @@
+import traceback
 import warnings
 
 import numpy as np
@@ -31,7 +32,7 @@ async def run_mcmc(
         mcmc_posterior_act_plot = plot_maker.plot_activity_density(burnin_data=mcmc_data_burn)
         mcmc_points_density = plot_maker.plot_points(points=points_)
     except Exception as err:
-        logger.error(f"Error while running simulation: {err}")
+        logger.error(f"Error while running simulation: {traceback.format_exc()}")
     else:
         logger.info("Reconstruction complete")
         return {
@@ -62,8 +63,8 @@ async def get_data_from_mcmc(
     if init_params:
         lambda_ = np.array([*init_params])
     else:
-        df_index = np.argmax(dataframe.iloc[:, 2])
-        lambda_ = np.array([dataframe.iloc[df_index, 0], dataframe.iloc[df_index, 1], 100, np.mean(dataframe.iloc[:, 2])])
+        df_max_index = np.argmax(dataframe.iloc[:, 2])
+        lambda_ = np.array([dataframe.iloc[df_max_index, 0], dataframe.iloc[df_max_index, 1], 100, np.mean(dataframe.iloc[:, 2])])
 
     logger.info("Data reconstruction in progress...")
 

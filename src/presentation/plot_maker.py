@@ -124,7 +124,7 @@ class PlotMaker:
         legend = ["Measurement Points", "MC simulated CPS"]
         title = "Fit of the peak in measurement time-series"
         filename = "mcmc_sequence_plot.png"
-        ax.scatter(self.data.index, self.data['pois_data'], label='Measurement data', alpha=0.5)
+        ax.scatter(self.data.index, self.data.iloc[:, 2], label='Measurement data', alpha=0.5)
         self.output_file = os.path.join(OUTPUT_DIR, filename)
         self.__set_ax_params(ax, title, labels={
             "x": "Measurement points along the road",
@@ -137,8 +137,8 @@ class PlotMaker:
 
         for i in range(0, len(res_burnin), 1000):
             green_line = mean_count_rate(
-                self.data["x"],
-                self.data['y'],
+                self.data.iloc[:, 0],
+                self.data.iloc[:, 1],
                 res_burnin[i, 0],
                 res_burnin[i, 1],
                 res_burnin[i, 2],

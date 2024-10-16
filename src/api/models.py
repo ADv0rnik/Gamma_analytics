@@ -25,9 +25,8 @@ class GenerationQueryParams:
 class SimulationQueryParams:
     def __init__(
             self,
-            sim_number: int = Query(default=10000, description="Number of simulations"),
+            sim_number: int = Query(default=20000, description="Number of simulations"),
             burn_in: int = Query(default=1000, description="Number of burn-in iterations"),
-            is_generic: bool = Query(default=True, description="Switch to True to use generic data"),
             is_specified: bool = Query(default=False, description="Switch to True to specify initial parameters"),
             init_x_pos: float = Query(default=0.0, description="Initial x position of the source"),
             init_y_pos: float = Query(default=50.0, description="Initial y position of the source"),
@@ -36,7 +35,6 @@ class SimulationQueryParams:
     ):
         self.sim_number = sim_number
         self.burn_in = burn_in
-        self.is_generic = is_generic
         self.is_specified = is_specified
         self.init_x_pos = init_x_pos
         self.init_y_pos = init_y_pos
