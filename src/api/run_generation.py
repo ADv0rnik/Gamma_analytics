@@ -7,7 +7,7 @@ from src.data_generators.regular_data_generator import RegularDataGenerator
 from src.data_generators.velocity_data_generator import VelocityDataGenerator
 from src.data_generators.base_data_generator import BaseDataGenerator
 from src.presentation.plot_maker import PlotMaker
-from src.config import (
+from src.settings.config import (
     NORMALIZED,
     IS_FIXED_DISTANCE,
     IS_POISSON

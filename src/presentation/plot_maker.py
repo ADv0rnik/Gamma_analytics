@@ -5,7 +5,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from dataclasses import dataclass
 from src.utils import mean_count_rate
-from src.config import OUTPUT_DIR, STEP, SRC_Y, CACHE
+from src.settings.config import OUTPUT_DIR, STEP, SRC_Y, CACHE
 
 GRID_PARAMS = {
     "linestyle":'-',

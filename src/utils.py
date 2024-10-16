@@ -9,7 +9,7 @@ import logging
 
 from typing import Tuple
 from geopandas import GeoDataFrame
-from src.config import SRC_Y, SRC_X, OUTPUT_DIR, EFFICIENCY, SCALE, BRANCH_RATIO, mu_air, WORK_DIR
+from src.settings.config import SRC_Y, SRC_X, OUTPUT_DIR, EFFICIENCY, SCALE, BRANCH_RATIO, mu_air, WORK_DIR
 
 
 logger = logging.getLogger("gamma")
@@ -84,7 +84,7 @@ def zip_files(files: list[str]) -> str:
     """
     basename, _ = os.path.splitext(files[0])
     zip_filename = f"{basename}.zip"
-    logger.info(f"Creating {zip_filename}")
+    logger.info(f"Creating archive: {zip_filename}")
 
     with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zip_f:
         for f in files:
