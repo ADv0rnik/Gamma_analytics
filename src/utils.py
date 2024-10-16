@@ -1,4 +1,6 @@
 import os
+import shutil
+
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -7,7 +9,7 @@ import logging
 
 from typing import Tuple
 from geopandas import GeoDataFrame
-from src.config import SRC_Y, SRC_X, OUTPUT_DIR, EFFICIENCY, SCALE, BRANCH_RATIO, mu_air
+from src.config import SRC_Y, SRC_X, OUTPUT_DIR, EFFICIENCY, SCALE, BRANCH_RATIO, mu_air, WORK_DIR
 
 
 logger = logging.getLogger("gamma")
@@ -47,7 +49,7 @@ async def calculate_angles(
 
     vector_x = np.append(np.diff(x_position), [0])
     vector_y = np.append(np.diff(y_position), [0])
-    source_vector_x = src_x - x_position
+    source_vector_x = x_position - src_x
     source_vector_y = y_position - src_y
     pred_angles = np.arctan2(vector_y, vector_x) - np.arctan2(
         source_vector_y, source_vector_x
@@ -65,7 +67,21 @@ async def create_dataframe(data: dict) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def zip_files(files: list[str]):
+async def create_job_dir(input_filename):
+    job_name, _ = os.path.splitext(os.path.basename(input_filename))
+    job_dir = os.path.join(WORK_DIR, job_name)
+    if os.path.isdir(job_dir):
+        shutil.rmtree(job_dir)
+    os.mkdir(job_dir)
+    return job_dir
+
+
+def zip_files(files: list[str]) -> str:
+    """
+    The function create a zip archive of all the files in the given list.
+    :param files: List of files to zip
+    :return: String representation of the zip archive
+    """
     basename, _ = os.path.splitext(files[0])
     zip_filename = f"{basename}.zip"
     logger.info(f"Creating {zip_filename}")

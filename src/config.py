@@ -9,7 +9,12 @@ from src.tools.interpolators import AttenuationInterpolator
 
 # common params
 BASE_DIR = Path(__file__).resolve().parent.parent
-OUTPUT_DIR = os.path.join(BASE_DIR, 'outputs')
+OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
+WORK_DIR = os.path.join(BASE_DIR, "temp")
+
+if not os.path.exists(WORK_DIR):
+    os.mkdir(WORK_DIR)
+
 ENV_PATH = os.path.join(BASE_DIR, '.env')
 CACHE = {
     "activity": 100
