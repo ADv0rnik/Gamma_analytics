@@ -11,11 +11,13 @@ from src.settings.config import (
     SRC_X,
     SRC_Y,
     EFFICIENCY,
-    BKG_COUNT_RATE, EFF_FILE, src_y_probe
+    EFF_FILE,
+    src_y_probe
 )
 from src.tools.data_formatter import formatter
 from src.tools.interpolators import EfficiencyInterpolator
 from src.utils import create_dataframe, calculate_angles
+from .generators_utils import gen_background
 
 
 class AngularDataGenerator(BaseDataGenerator):
@@ -23,7 +25,6 @@ class AngularDataGenerator(BaseDataGenerator):
         self.coordinates = kwargs["coordinates"]
         self.dist_predefined = IS_FIXED_DISTANCE
         self.activity = kwargs["activity"]
-        self.background = BKG_COUNT_RATE,
         self.src_x = SRC_X,
         self.src_y = SRC_Y,
         self.eff = EFFICIENCY
@@ -91,7 +92,7 @@ class AngularDataGenerator(BaseDataGenerator):
         calc_angles = await calculate_angles(x_position, y_position, SRC_X, src_y)
         eff_rel = efficiency_interpolator.interpolate(calc_angles)
 
+        bkg_arr = await gen_background(len(dist))
         angular_count_rate = (activity * SCALE * BRANCH_RATIO * self.eff * eff_rel * np.exp(-mu_air * dist)) / (
                     4 * np.pi * dist ** 2)
-        return np.round(angular_count_rate, 2) + self.background
-
+        return np.round(angular_count_rate, 2) + bkg_arr

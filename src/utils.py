@@ -118,3 +118,5 @@ def mean_count_rate(
     dist = np.sqrt((x_position - src_x) ** 2 + (y_position - src_y) ** 2)
     count_rate = (activity * SCALE * BRANCH_RATIO * det_eff * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
     return np.round(count_rate, 2) + bkg
+
+

@@ -36,6 +36,7 @@ BRANCH_RATIO = BranchingRatio.CS_137.value
 SOURCE_ENERGY = Energy.CS_137.value  # in KeV
 SCALE = 1e6
 BKG_COUNT_RATE = 10# in cps
+BKG_SIGMA = 1
 
 # Position of the orphan source within Cartesian coordinate system.
 # Use IS_FIXED_DISTANCE=True if the distance from the road to the source (SRC_X and SRC_Y) is specified.
