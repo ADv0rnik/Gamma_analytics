@@ -3,6 +3,7 @@ import asyncio
 import numpy as np
 
 from src.data_generators.base_data_generator import BaseDataGenerator
+from src.data_generators.generators_utils import gen_background
 from src.settings.config import (
     SCALE,
     BRANCH_RATIO,
@@ -11,7 +12,6 @@ from src.settings.config import (
     SRC_X,
     SRC_Y,
     EFFICIENCY,
-    BKG_COUNT_RATE,
     src_y_probe
 )
 from src.utils import create_dataframe
@@ -22,8 +22,7 @@ class VelocityDataGenerator(BaseDataGenerator):
         self.coordinates = kwargs["coordinates"]
         self.dist_predefined = IS_FIXED_DISTANCE
         self.activity = kwargs["activity"]
-        self.background = BKG_COUNT_RATE,
-        self.src_x = SRC_X,
+        self.src_x = SRC_X
         self.eff = EFFICIENCY
         self.speed = kwargs["speed"]
         self.start_point = kwargs["road_span"]
@@ -70,7 +69,8 @@ class VelocityDataGenerator(BaseDataGenerator):
         y_position = np.zeros(self.span)
 
         dist = np.sqrt((x_position - self.src_x) ** 2 + (y_position - src_y) ** 2)
+        bkg_arr = await gen_background(len(dist))
         count_rate = ((self.activity * SCALE * BRANCH_RATIO * EFFICIENCY * np.exp(-mu_air * dist)) / (
                     4 * np.pi * dist ** 2)) * self.time
 
-        return np.round(count_rate, 2) + self.background, x_position, y_position
+        return np.round(count_rate, 2) + bkg_arr, x_position, y_position

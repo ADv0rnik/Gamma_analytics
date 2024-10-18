@@ -10,10 +10,10 @@ from src.settings.config import (
     mu_air,
     SRC_X,
     SRC_Y,
-    EFFICIENCY,
-    BKG_COUNT_RATE
+    EFFICIENCY
 )
 from src.utils import create_dataframe
+from .generators_utils import gen_background
 
 
 class RegularDataGenerator(BaseDataGenerator):
@@ -21,7 +21,6 @@ class RegularDataGenerator(BaseDataGenerator):
         self.coordinates = kwargs["coordinates"]
         self.dist_predefined = IS_FIXED_DISTANCE
         self.activity = kwargs["activity"]
-        self.background = BKG_COUNT_RATE,
         self.src_x = SRC_X,
         self.src_y = SRC_Y,
         self.eff = EFFICIENCY
@@ -74,5 +73,6 @@ class RegularDataGenerator(BaseDataGenerator):
             src_y=SRC_Y,
     ):
         dist = np.sqrt((x_position - self.src_x) ** 2 + (y_position - src_y) ** 2)
+        bkg_arr = await gen_background(len(dist))
         count_rate = (activity * SCALE * BRANCH_RATIO * self.eff * np.exp(-mu_air * dist)) / (4 * np.pi * dist ** 2)
-        return np.round(count_rate, 2) + self.background
+        return np.round(count_rate, 2) + bkg_arr
