@@ -12,6 +12,8 @@ from src.api.run_generation import run_data_generation
 from src.api.run_simulation import run_mcmc
 from src.tools.profiler import construct_dataframe
 from .models import GenerationQueryParams, SimulationQueryParams
+from src.exceptions.error_handlers import WrongFileFormatException
+from src.exceptions.error_codes import ErrorCodesEnum
 
 
 analytics_router = APIRouter(tags=["analytics"])
@@ -131,7 +133,7 @@ async def run_simulation_from_file(
                 f_out.write(buffer)
 
             if not os.path.isfile(local_filename):
-                raise FileNotFoundError
+                raise WrongFileFormatException(ErrorCodesEnum.WRONG_FILE_FORMAT.value)
 
             data_from_file = pd.read_csv(local_filename)
             data_for_simulation = await construct_dataframe(data_from_file)
@@ -172,4 +174,4 @@ async def run_simulation_from_file(
             return HTTPException(status_code=500, detail=f"An {FileNotFoundError.__name__} occurred  while handling the request")
     else:
         logger.error("Wrong file format or file is not received")
-        return HTTPException(status_code=500, detail="Wrong file format or file is not received")
+        raise WrongFileFormatException(ErrorCodesEnum.WRONG_FILE_FORMAT.value)
