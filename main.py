@@ -5,6 +5,11 @@ from fastapi import FastAPI
 from src.settings.config import ApiSettings
 from src.settings.config import LOGGING_CONFIG
 from src.api.api import analytics_router
+from src.exceptions.error_handlers import (
+    WrongFileFormatException,
+    wrong_file_format_exception_handler,
+    generic_exception_handler
+)
 
 
 logging.config.dictConfig(LOGGING_CONFIG)
@@ -26,6 +31,10 @@ def start_application(config: ApiSettings):
 settings = ApiSettings()
 app = start_application(settings)
 app.include_router(analytics_router, prefix=settings.API_V1_STR)
+
+app.add_exception_handler(WrongFileFormatException, wrong_file_format_exception_handler)
+app.add_exception_handler(Exception, generic_exception_handler)
+
 
 if __name__ == "__main__":
     logger.info(f"Starting uvicorn server on {settings.PROJECT_HOST}:{settings.PROJECT_PORT}")
